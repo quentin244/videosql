@@ -92,7 +92,8 @@ drop TRIGGER VerifLocationPhys
 create TRIGGER VerifLocationPhys
 ON LouerPhys
 FOR INSERT   
-AS 
+AS
+Declare @v_Id id_t = (select id from inserted) 
 Declare @v_TitreVF TitreVF_t = (select TitreVF from inserted)
 Declare @v_Date DateV_t = (select DateV from inserted)
 Declare @v_Pays Pays_t = (select Pays from inserted)
@@ -103,7 +104,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockPhys @v_TitreVF, @v_Date, @v_Pays, @v_Edition
+	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
@@ -778,3 +779,14 @@ begin
 		set @politique=@politique+1
 		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
 end
+
+create or alter procedure ProcDRMreminder
+@P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
+AS 
+Declare @v_DRM varchar(25) = (Select DRM From Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+BEGIN
+	Print 'DRM : ' + @v_DRM
+	Return 1
+END
+
+exec ProcDRMreminder 'Titanic','2011-09-27','Belgique','Idée'
