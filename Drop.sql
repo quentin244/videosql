@@ -1,4 +1,3 @@
-
 drop table DistinguerProfessionnel;
 drop table DistinguerFilm;
 drop table Distinguer;
@@ -41,6 +40,7 @@ drop type support_t;
 drop type id_t ;
 drop type Etat_t;
 //////////////
+drop procedure PROCavantAbo
 drop procedure EstAbo
 drop procedure AfficheEdition
 drop procedure rachat
@@ -70,5 +70,4 @@ drop procedure PROCrenouvellementNum
 drop procedure PROCrenouvellementPhys
 drop procedure PROCduree
 drop procedure ProcVraiNom
-
 /////////////

@@ -21,6 +21,8 @@ create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure VerifStockPhys
+
 create procedure VerifStockPhys
 @P_filmVF Film_t
 as
@@ -36,6 +38,8 @@ FETCH NEXT FROM C_StockFilm into @v_Etat
 IF @@FETCH_STATUS <> 0
 	BEGIN
 	print 'ce film n''est pas en stock'
+ 	CLOSE C_StockFilm
+ 	DEALLOCATE C_StockFilm
 	Return 0
 	END
 ELSE
@@ -45,6 +49,8 @@ BEGIN
 			if(@v_Etat<5)
 			BEGIN
 				print 'Ce film est en stock'
+			 	CLOSE C_StockFilm
+			 	DEALLOCATE C_StockFilm
 				Return 1
 			END
 			else
@@ -55,6 +61,8 @@ CLOSE C_StockFilm
 DEALLOCATE C_StockFilm
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure VerifStockNum
+
 create procedure VerifStockNum
 @P_filmVF Film_t
 as
@@ -69,18 +77,24 @@ FETCH NEXT FROM C_StockFilm into @v_Film
 
 IF @@FETCH_STATUS <> 0
 	BEGIN
-    print 'ce film n''est pas en stock'
+    	print 'ce film n''est pas en stock'
+	CLOSE C_StockFilm
+ 	DEALLOCATE C_StockFilm
 	Return 0
 	END
 ELSE
 BEGIN
     print 'Ce film est en stock'
+ 	CLOSE C_StockFilm
+ 	DEALLOCATE C_StockFilm
 	Return 1
 END
 CLOSE C_StockFilm
 DEALLOCATE C_StockFilm
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcPEGIreminder
+
 create procedure ProcPEGIreminder
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t,  @P_NumeroAbonne Numero_t
 AS 
@@ -95,6 +109,8 @@ IF (@v_AgeP < @v_PegiF)
 Return 0
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop TRIGGER VerifLocationPhys
+
 create TRIGGER VerifLocationPhys
 ON LouerPhys
 FOR INSERT   
@@ -109,7 +125,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStock @v_TitreVF
+	exec @return_status_Stock = VerifStockPhys @v_TitreVF
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
@@ -133,6 +149,8 @@ BEGIN
 	END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop TRIGGER PEGIreminderNum
+
 create TRIGGER PEGIreminderNum
 ON LouerNum
 FOR INSERT   
@@ -147,7 +165,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStock @v_TitreVF
+	exec @return_status_Stock = VerifStockNum @v_TitreVF
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
@@ -171,6 +189,8 @@ BEGIN
 	END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCfilmNonLouable
+
 create procedure PROCfilmNonLouable
 AS 
 Declare @v_Support support_t
@@ -200,6 +220,8 @@ BEGIN
 	DEALLOCATE C_Film
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCrealisateur
+
 create procedure PROCrealisateur
 @P_film film_t
 AS
@@ -209,6 +231,8 @@ BEGIN
     print @P_film +' est realise par '+@v_nomR
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCfilmAct
+
 create procedure PROCfilmAct
 @P_nomA nom_t, @P_prenomA prenom_t
 AS
@@ -239,6 +263,8 @@ CLOSE C_filmAct
 DEALLOCATE C_filmAct
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCdistinctionFilm
+
 create procedure PROCdistinctionFilm
 @P_film film_t
 AS
@@ -269,6 +295,8 @@ CLOSE C_filmDist
 DEALLOCATE C_filmDist
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCprixPhys
+
 create procedure PROCprixPhys
 @P_annee_min annee_t, @P_annee_max annee_t
 AS
@@ -297,6 +325,8 @@ CLOSE C_prixPhys
 DEALLOCATE C_prixPhys
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCprixNum
+
 create procedure PROCprixNum
 @P_annee_min annee_t, @P_annee_max annee_t
 AS
@@ -329,6 +359,8 @@ DEALLOCATE C_prixNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure EstAbo
+
 create procedure EstAbo
 @P_Prenom prenom_t, @P_Nom nom_t
 AS
@@ -349,6 +381,8 @@ BEGIN
     END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure AfficheEdition
+
 create procedure AfficheEdition
 @P_TitreVF TitreVF_t
 AS
@@ -376,6 +410,8 @@ BEGIN
 	DEALLOCATE ListEdition
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCfilmreal
+
 create procedure PROCfilmreal
 @P_nomReal Nom_t, @P_prenomReal Prenom_t
 AS
@@ -407,6 +443,8 @@ BEGIN
 	DEALLOCATE C_filmDeReal
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure rachat
+
 create procedure rachat
 @P_Id id_t
 AS
@@ -431,19 +469,21 @@ IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_T
     END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create procedure trENDing
+drop procedure trending
+
+create procedure trending
 AS
 Declare @v_TitreVF TitreVF_t
 Declare @v_count int
-DECLARE C_Film_trEND CURSOR FOR
+DECLARE C_Film_trend CURSOR FOR
     select TitreVF, count(*)
 	from LouerPhys
 	group by TitreVF
     order by count(*) desc
 
 BEGIN
-    open C_Film_trEND
-    FETCH NEXT FROM C_Film_trEND into @v_TitreVF, @v_count
+    open C_Film_trend
+    FETCH NEXT FROM C_Film_trend into @v_TitreVF, @v_count
 	if @@FETCH_STATUS <> 0
     	print 'Aucun Film trENDing'
 	Else
@@ -452,13 +492,15 @@ BEGIN
     	while @@FETCH_STATUS = 0
    		 BEGIN
         	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_count)
-        	FETCH NEXT FROM C_Film_trEND into @v_TitreVF, @v_count
+        	FETCH NEXT FROM C_Film_trend into @v_TitreVF, @v_count
    		 END
    	 END
-	CLOSE C_Film_trEND
-	DEALLOCATE C_Film_trEND
+	CLOSE C_Film_trend
+	DEALLOCATE C_Film_trend
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure durable
+
 create procedure durable
 AS
 Declare @v_TitreVF TitreVF_t
@@ -486,8 +528,9 @@ BEGIN
 	CLOSE C_durable
 	DEALLOCATE C_durable
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCfilmVo
+
 create procedure PROCfilmVo
 @P_filmVF Film_t
 AS
@@ -497,6 +540,8 @@ BEGIN
     print @P_filmVF+' a pour titre en original '+@P_titreVO
 END
 //////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCavantAbo
+
 create procedure PROCavantAbo
 @P_abo Abonnement_t
 AS
@@ -525,6 +570,8 @@ DEALLOCATE C_avantAbo
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCretardNum
+
 create procedure PROCretardNum
 AS
 DECLARE @v_num Numero_t
@@ -556,6 +603,8 @@ DEALLOCATE C_retardNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCretardPhys
+
 create procedure PROCretardPhys
 AS
 DECLARE @v_num Numero_t
@@ -587,6 +636,8 @@ DEALLOCATE C_retardPhys
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCrenouvellementNum
+
 create procedure PROCrenouvellementNum
 AS
 DECLARE @v_num Numero_t
@@ -626,6 +677,8 @@ DEALLOCATE C_renouvellementNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCrenouvellementPhys
+
 create procedure PROCrenouvellementPhys
 AS
 DECLARE @v_num Numero_t
@@ -665,6 +718,8 @@ DEALLOCATE C_renouvellementPhys
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCduree
+
 create procedure PROCduree
 @P_nomR nom_t,@P_prenomR prenom_t
 as
@@ -696,6 +751,8 @@ DEALLOCATE C_duree
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcVraiNom
+
 create procedure ProcVraiNom
 @P_filmVF Film_t
 as
