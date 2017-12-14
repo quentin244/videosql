@@ -23,74 +23,52 @@ create type Etat_t from tinyint;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 
-create procedure VerifStockPhys
-@P_filmVF Film_t
+create or alter procedure VerifStockPhys
+@P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
 as
-Declare @v_Etat Etat_t
-DECLARE C_StockFilm CURSOR FOR
-select Etat
-from Physique
-where TitreVF = @P_filmVF
+declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+declare @v_DateDebut date = (select DateDebut from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+Declare @v_Etat Etat_t = (select Etat from Physique where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
 BEGIN
-OPEN C_StockFilm
-FETCH NEXT FROM C_StockFilm into @v_Etat
-
-IF @@FETCH_STATUS <> 0
+	if(@v_Etat<5)
 	BEGIN
-	print 'ce film n''est pas en stock'
- 	CLOSE C_StockFilm
- 	DEALLOCATE C_StockFilm
-	Return 0
+		print 'Ce film est en stock'
+		if((@v_DateDebut < (select getDate())) and ((select getDate()) < @v_DateFin))
+		begin
+			print 'ce film est deja louer'
+			Return 0
+		end
+		else
+		begin
+			print 'ce film est disponible'
+			Return 1
+		end
 	END
-ELSE
-BEGIN
-	while @@FETCH_STATUS = 0
-		BEGIN
-			if(@v_Etat<5)
-			BEGIN
-				print 'Ce film est en stock'
-			 	CLOSE C_StockFilm
-			 	DEALLOCATE C_StockFilm
-				Return 1
-			END
-			else
-			FETCH NEXT FROM C_StockFilm into @v_Etat
-		END
-END
-CLOSE C_StockFilm
-DEALLOCATE C_StockFilm
+	else
+	begin
+		print 'ce film n''est pas louable'
+		Return 0
+	end
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockNum
 
 create procedure VerifStockNum
-@P_filmVF Film_t
+@P_filmVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
 as
-Declare @v_Film Film_t
-DECLARE C_StockFilm CURSOR FOR
-select titreVF
-from Numérique
-where TitreVF = @P_filmVF
+Declare @v_Film TitreVF_t = (select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
 BEGIN
-OPEN C_StockFilm
-FETCH NEXT FROM C_StockFilm into @v_Film
-
-IF @@FETCH_STATUS <> 0
+	IF (not exists(select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition))
 	BEGIN
-    	print 'ce film n''est pas en stock'
-	CLOSE C_StockFilm
- 	DEALLOCATE C_StockFilm
-	Return 0
+		print 'ce film n''est pas en stock'
+		Return 0
 	END
-ELSE
-BEGIN
-    print 'Ce film est en stock'
- 	CLOSE C_StockFilm
- 	DEALLOCATE C_StockFilm
-	Return 1
-END
-CLOSE C_StockFilm
-DEALLOCATE C_StockFilm
+	ELSE
+	BEGIN
+		print 'Ce film est en stock'
+			print 'ce film est disponible'
+			Return 1
+	END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcPEGIreminder
@@ -125,7 +103,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockPhys @v_TitreVF
+	exec @return_status_Stock = VerifStockPhys @v_TitreVF, @v_Date, @v_Pays, @v_Edition
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
@@ -149,9 +127,9 @@ BEGIN
 	END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop TRIGGER PEGIreminderNum
+drop TRIGGER VerifLocationNum
 
-create TRIGGER PEGIreminderNum
+create TRIGGER VerifLocationNum
 ON LouerNum
 FOR INSERT   
 AS 
@@ -165,7 +143,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockNum @v_TitreVF
+	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Pays, @v_Edition
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
