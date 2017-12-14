@@ -778,4 +778,3 @@ begin
 		set @politique=@politique+1
 		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
 end
-
