@@ -762,3 +762,25 @@ BEGIN
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROClitigePhys
+
+create procedure PROClitigePhys
+@P_numClient NumAboT
+AS
+Declare @v_nb int
+Declare @politique tinyint
+
+begin 
+	set @politique=0
+	set @v_nb=(select*
+	from Film,Version,Physique,LouerPhys,Abonnement,Abonne
+	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Version.pays=Numerique.pays and pays.Edition=Version.edition
+	and Physique.dateV=louerPhys.dateV and Physique.pays=louerPhys.pays and Physique.edition=louerPhys.edition and LouerPhys.numero=Abonne.numero
+	and Physique.id=LouerPhys.id and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureemax))
+
+if @v_nb >= 1
+@politique=@politique+1
+end
+end
+go
+
