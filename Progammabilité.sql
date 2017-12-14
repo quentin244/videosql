@@ -31,6 +31,8 @@ FETCH NEXT FROM C_StockFilm into @v_Etat
 IF @@FETCH_STATUS <> 0
 	Begin
 	print 'ce film n''est pas en stock'
+	CLOSE C_StockFilm
+	DEALLOCATE C_StockFilm
 	Return 0
 	End
 ELSE
@@ -40,6 +42,8 @@ Begin
 			if(@v_Etat<5)
 			begin
 				print 'Ce film est en stock'
+				CLOSE C_StockFilm
+				DEALLOCATE C_StockFilm
 				Return 1
 			end
 			else
@@ -49,7 +53,6 @@ End
 CLOSE C_StockFilm
 DEALLOCATE C_StockFilm
 end
-exec VerifStockPhys Titanic
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create or alter procedure VerifStockNum
 @P_filmVF FilmT
@@ -66,11 +69,15 @@ FETCH NEXT FROM C_StockFilm into @v_Film
 IF @@FETCH_STATUS <> 0
 	Begin
     print 'ce film n''est pas en stock'
+	CLOSE C_StockFilm
+	DEALLOCATE C_StockFilm
 	Return 0
 	End
 ELSE
 Begin
     print 'Ce film est en stock'
+	CLOSE C_StockFilm
+	DEALLOCATE C_StockFilm
 	Return 1
 End
 CLOSE C_StockFilm
@@ -107,7 +114,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStock @v_TitreVF
+	exec @return_status_Stock = VerifStockPhys @v_TitreVF
 	if(@return_status_Stock = 0)
 		begin
 			print ('Aucun Fim en stock Annulé');
@@ -132,7 +139,7 @@ BEGIN
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-CREATE or alter TRIGGER PEGIreminderNum
+CREATE or alter TRIGGER VerifLocationNum
 ON LouerNum
 FOR INSERT   
 AS 
@@ -146,7 +153,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStock @v_TitreVF
+	exec @return_status_Stock = VerifStockNum @v_TitreVF
 	if(@return_status_Stock = 0)
 		begin
 			print ('Aucun Fim en stock Annulé');
