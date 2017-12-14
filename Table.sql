@@ -1,4 +1,4 @@
-﻿/*
+/*
 drop table DistinguerProfessionnel;
 drop table DistinguerFilm;
 drop table Distinguer;
@@ -203,3 +203,4 @@ Primary Key(Nom_Personne, Prenom, DateNaiss, Nom, Categorie, Lieu),
 constraint fk1_distinguerPro FOREIGN KEY (Nom,Prenom,DateNaiss) REFERENCES Personne(Nom,Prenom,DateNaiss) on update cascade on delete no action,
 constraint fk2_distinguerPro FOREIGN KEY (Nom,Categorie,Lieu) REFERENCES Distinction(Nom,Categorie,Lieu) on update cascade on delete no action
 );
+
