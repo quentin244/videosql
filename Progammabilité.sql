@@ -1,23 +1,28 @@
-﻿create type Numero_t from smallint;
+create type Abonnement_t from varchar(25);
+create type PrixAbonnement_t from smallint;
+create type NbFilms_t from smallint;
+create type Duree_t from integer;
+create type Numero_t from smallint;
 create type Film_t from varchar(52);
 create type Real_t from varchar(25);
 create type Nom_t from varchar(25);
 create type Prenom_t from varchar(25);
 create type PEGI_t from tinyint;
 create type TitreVF_t from varchar(52);
+create type TitreVO_t from varchar(52);
 create type DateV_t from date;
 create type Pays_t from varchar(25);
 create type Edition_t from varchar(25);
-create type nomDistinctionT from varchar(25);
-create type anneeT from int;
-create type prixT from real;
+create type nomDistinction_t from varchar(25);
+create type annee_t from int;
+create type prix_t from real;
 create type dateNaiss_t from date;
 create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure VerifStockPhys
-@P_filmVF FilmT
+create procedure VerifStockPhys
+@P_filmVF Film_t
 as
 Declare @v_Etat Etat_t
 DECLARE C_StockFilm CURSOR FOR
@@ -29,32 +34,31 @@ OPEN C_StockFilm
 FETCH NEXT FROM C_StockFilm into @v_Etat
 
 IF @@FETCH_STATUS <> 0
-	Begin
+	BEGIN
 	print 'ce film n''est pas en stock'
 	Return 0
-	End
+	END
 ELSE
-Begin
+BEGIN
 	while @@FETCH_STATUS = 0
-		Begin
+		BEGIN
 			if(@v_Etat<5)
-			begin
+			BEGIN
 				print 'Ce film est en stock'
 				Return 1
-			end
+			END
 			else
 			FETCH NEXT FROM C_StockFilm into @v_Etat
-		End
-End
+		END
+END
 CLOSE C_StockFilm
 DEALLOCATE C_StockFilm
-end
-exec VerifStockPhys Titanic
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure VerifStockNum
-@P_filmVF FilmT
+create procedure VerifStockNum
+@P_filmVF Film_t
 as
-Declare @v_Film FilmT
+Declare @v_Film Film_t
 DECLARE C_StockFilm CURSOR FOR
 select titreVF
 from Numérique
@@ -64,36 +68,34 @@ OPEN C_StockFilm
 FETCH NEXT FROM C_StockFilm into @v_Film
 
 IF @@FETCH_STATUS <> 0
-	Begin
+	BEGIN
     print 'ce film n''est pas en stock'
 	Return 0
-	End
+	END
 ELSE
-Begin
+BEGIN
     print 'Ce film est en stock'
 	Return 1
-End
+END
 CLOSE C_StockFilm
 DEALLOCATE C_StockFilm
-end
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure ProcPEGIreminder
+create procedure ProcPEGIreminder
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t,  @P_NumeroAbonne Numero_t
 AS 
 Declare @v_AgeP int = (Year(getdate())- Year((Select DateNaiss From Abonné Where Numero = @P_NumeroAbonne)))
 Declare @v_PegiF int = (Select PEGI FROM Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
-Begin
+BEGIN
 IF (@v_AgeP < @v_PegiF)
     	BEGIN
     		Print 'Attention votre age est inferieur a l''age minimal conseillé'
 			Return 1
     	END
 Return 0
-End
-
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
-CREATE or alter TRIGGER VerifLocationPhys
+create TRIGGER VerifLocationPhys
 ON LouerPhys
 FOR INSERT   
 AS 
@@ -109,30 +111,29 @@ DECLARE @return_status_Stock int;
 BEGIN 
 	exec @return_status_Stock = VerifStock @v_TitreVF
 	if(@return_status_Stock = 0)
-		begin
+		BEGIN
 			print ('Aucun Fim en stock Annulé');
 			ROLLBACK TRANSACTION;
-		end
+		END
 	else
-	begin
+	BEGIN
    if(@v_Force <> 2)
-	Begin
+	BEGIN
 		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
 		if(@return_status_PEGI = 1)
-		begin
+		BEGIN
 			print ('Insertion Annulé');
 			ROLLBACK TRANSACTION;
-		end
-	End
+		END
+	END
 	else
-	Begin
+	BEGIN
 		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
-	End
-	end
+	END
+	END
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-CREATE or alter TRIGGER PEGIreminderNum
+create TRIGGER PEGIreminderNum
 ON LouerNum
 FOR INSERT   
 AS 
@@ -148,30 +149,29 @@ DECLARE @return_status_Stock int;
 BEGIN 
 	exec @return_status_Stock = VerifStock @v_TitreVF
 	if(@return_status_Stock = 0)
-		begin
+		BEGIN
 			print ('Aucun Fim en stock Annulé');
 			ROLLBACK TRANSACTION;
-		end
+		END
 	else
-	begin
+	BEGIN
    if(@v_Force <> 2)
-	Begin
+	BEGIN
 		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
 		if(@return_status_PEGI = 1)
-		begin
+		BEGIN
 			print ('Insertion Annulé');
 			ROLLBACK TRANSACTION;
-		end
-	End
+		END
+	END
 	else
-	Begin
+	BEGIN
 		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
-	End
-	end
+	END
+	END
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCfilmNonLouable
+create procedure PROCfilmNonLouable
 AS 
 Declare @v_Support support_t
 Declare @v_TitreVF TitreVF_t
@@ -182,39 +182,37 @@ DECLARE C_Film CURSOR FOR
 	select  Support, TitreVF, DateV, Pays, Edition 
 	from Physique
 	where Etat = 5;
-begin
+BEGIN
 	open C_Film
 	FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
 	if @@FETCH_STATUS <> 0
 		print 'Aucun Film non louable'
 	Else
-	Begin
+	BEGIN
 		print 'Film non louable: '
 		while @@FETCH_STATUS = 0
-		Begin
+		BEGIN
 			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) +' ' + @v_Pays + ' ' + @v_Edition
 			FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
-		End
-	end
+		END
+	END
 	CLOSE C_Film
 	DEALLOCATE C_Film
-end
-
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCrealisateur
-@P_film filmT
+create procedure PROCrealisateur
+@P_film film_t
 AS
-DECLARE @v_nomR nomT
-Begin
+DECLARE @v_nomR nom_t
+BEGIN
     Set @v_nomR = (select nom from participer where @P_film=titreVF And Role = 'Realisateur');
     print @P_film +' est realise par '+@v_nomR
-End
-
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCfilmAct
-@P_nomA nomT, @P_prenomA prenomT
+create procedure PROCfilmAct
+@P_nomA nom_t, @P_prenomA prenom_t
 AS
-DECLARE @v_film filmT
+DECLARE @v_film Film_t
 
 Declare C_filmAct CURSOR FOR
 select titreVF
@@ -240,12 +238,11 @@ END
 CLOSE C_filmAct
 DEALLOCATE C_filmAct
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCdistinctionFilm
-@P_film filmT
+create procedure PROCdistinctionFilm
+@P_film film_t
 AS
-DECLARE @v_nomDist nomDistinctionT 
+DECLARE @v_nomDist nomDistinction_t 
 DECLARE @v_categorieDist varchar(25)
 DECLARE @v_lieuDist varchar(25) 
 Declare C_filmDist CURSOR FOR
@@ -253,7 +250,7 @@ select nom, Categorie
 from DistinguerFilm 
 where @P_film=titreVF
 
-Begin
+BEGIN
 OPEN C_filmDist
 FETCH NEXT FROM C_filmDist into @v_nomDist, @v_categorieDist
 
@@ -271,13 +268,12 @@ END
 CLOSE C_filmDist
 DEALLOCATE C_filmDist
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCprixPhys
-@P_annee_min anneeT, @P_annee_max anneeT
+create procedure PROCprixPhys
+@P_annee_min annee_t, @P_annee_max annee_t
 AS
 DECLARE @v_film TitreVF_t
-DECLARE @v_prix prixT
+DECLARE @v_prix prix_t
 DECLARE C_prixPhys CURSOR FOR
 select titreVF,prix
 from Physique
@@ -300,13 +296,12 @@ END
 CLOSE C_prixPhys
 DEALLOCATE C_prixPhys
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCprixNum
-@P_annee_min anneeT, @P_annee_max anneeT
+create procedure PROCprixNum
+@P_annee_min annee_t, @P_annee_max annee_t
 AS
-DECLARE @v_film filmT
-DECLARE @v_prix prixT
+DECLARE @v_film film_t
+DECLARE @v_prix prix_t
 
 DECLARE C_prixNum CURSOR FOR
 select titreVF,prix
@@ -333,30 +328,28 @@ CLOSE C_prixNum
 DEALLOCATE C_prixNum
 
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure EstAbo
+create procedure EstAbo
 @P_Prenom prenom_t, @P_Nom nom_t
 AS
 Declare @v_Numero Numero_t
 Declare @true tinyint
 set @true = 1;
-Begin
+BEGIN
     If (Exists (select * from Abonné where Nom=@P_Nom and Prenom = @P_Prenom))
    	 set @true = 0;
-    Begin
+    BEGIN
    	 If @true=0
-   		 begin
+   		 BEGIN
    		 set @v_Numero = (select Numero from Abonné where Nom=@P_Nom and Prenom = @P_Prenom);
    		 print ''+str(@v_Numero);
-   		 end
+   		 END
    	 ELSE
    		 print 'Nup';
-    End
-End
-
+    END
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure AfficheEdition
+create procedure AfficheEdition
 @P_TitreVF TitreVF_t
 AS
 Declare @v_Edition Edition_t
@@ -368,23 +361,22 @@ BEGIN
 	OPEN ListEdition
     FETCH NEXT FROM ListEdition into @v_Edition
     IF @@FETCH_STATUS <> 0
-	Begin
+	BEGIN
    		print 'Aucune edition n''est repertoriée'
-	 End
+	 END
     ELSE
     BEGIN
    		While @@FETCH_STATUS = 0
-		Begin
+		BEGIN
    			Print @v_Edition
    			FETCH NEXT FROM ListEdition into @v_Edition
-		End
+		END
     END
 	CLOSE ListEdition
 	DEALLOCATE ListEdition
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCfilmreal
+create procedure PROCfilmreal
 @P_nomReal Nom_t, @P_prenomReal Prenom_t
 AS
 Declare @v_film TitreVF_t
@@ -399,9 +391,9 @@ BEGIN
 	OPEN C_filmDeReal
 	FETCH NEXT FROM C_filmDeReal into @v_film
 	IF @@FETCH_STATUS <> 0
-	Begin
+	BEGIN
 		print 'Aucun film de ce réalisateur n''est repertorié dans la base de donnée'
-	End
+	END
 	ELSE
 	BEGIN
 		print 'les films de ' + @P_nomReal + ' sont:'
@@ -414,7 +406,6 @@ BEGIN
 	CLOSE C_filmDeReal
 	DEALLOCATE C_filmDeReal
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create procedure rachat
 @P_Id id_t
@@ -427,54 +418,47 @@ set @v_Edition = (Select Edition From Physique Where id = @P_Id);
 set @v_TitreVF = (Select TitreVF From Physique where id = @P_Id);
 set @v_Pays = (Select Pays From Physique Where id = @P_Id);
 set @v_DateV = (Select DateV From Physique Where id = @P_Id);
-Begin
+BEGIN
 delete From Physique Where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV;
 print'id suppr'
 IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV)=0)
     Delete From Version Where Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV
     print'version suppr'
-    Begin
+    BEGIN
     IF ((select COUNT(*) From Version Where @v_TitreVF = TitreVF)=0)
    	 print'film suppr'
    	 delete from Film Where  TitreVF =@v_TitreVF
-    end
-End
-
-
+    END
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure trending
-
-create procedure trending
+create procedure trENDing
 AS
 Declare @v_TitreVF TitreVF_t
 Declare @v_count int
-DECLARE C_FilmTrend CURSOR FOR
+DECLARE C_Film_trEND CURSOR FOR
     select TitreVF, count(*)
 	from LouerPhys
 	group by TitreVF
     order by count(*) desc
 
-Begin
-    open C_FilmTrend
-    FETCH NEXT FROM C_FilmTrend into @v_TitreVF, @v_count
+BEGIN
+    open C_Film_trEND
+    FETCH NEXT FROM C_Film_trEND into @v_TitreVF, @v_count
 	if @@FETCH_STATUS <> 0
-    	print 'Aucun Film trending'
+    	print 'Aucun Film trENDing'
 	Else
-   	 Begin
-    	print 'Film trending: '
+   	 BEGIN
+    	print 'Film trENDing: '
     	while @@FETCH_STATUS = 0
-   		 Begin
+   		 BEGIN
         	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_count)
-        	FETCH NEXT FROM C_FilmTrend into @v_TitreVF, @v_count
-   		 End
-   	 end
-	CLOSE C_FilmTrend
-	DEALLOCATE C_FilmTrend
-end
-
+        	FETCH NEXT FROM C_Film_trEND into @v_TitreVF, @v_count
+   		 END
+   	 END
+	CLOSE C_Film_trEND
+	DEALLOCATE C_Film_trEND
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure durable
-
 create procedure durable
 AS
 Declare @v_TitreVF TitreVF_t
@@ -485,50 +469,40 @@ DECLARE C_durable CURSOR FOR
 	group by TitreVF
     order by count(Etat)
 
-Begin
+BEGIN
     open C_durable
     FETCH NEXT FROM C_durable into @v_TitreVF, @v_avg
 	if @@FETCH_STATUS <> 0
     	print 'Aucun Film'
 	Else
-   	 Begin
-    	print 'Film trending: '
+   	 BEGIN
+    	print 'Film trENDing: '
     	while @@FETCH_STATUS = 0
-   		 Begin
+   		 BEGIN
         	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_avg)
         	FETCH NEXT FROM C_durable into @v_TitreVF, @v_avg
-   		 End
-   	 end
+   		 END
+   	 END
 	CLOSE C_durable
 	DEALLOCATE C_durable
-end
+END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 create procedure PROCfilmVo
-@P_filmVF FilmT
+@P_filmVF Film_t
 AS
-DECLARE @P_titreVO filmVoT
-Begin
+DECLARE @P_titreVO TitreVO_t
+BEGIN
     SET @P_titreVO=(select titreVO from Film where TitreVF=@P_filmVF);
     print @P_filmVF+' a pour titre en original '+@P_titreVO
-End
-
-create type AboT from varchar(25);
-create type PrixAboT from smallint;
-create type NbFilmsT from smallint;
-create type DureeT from integer;
-create type NumAboT from smallint;
-
-drop type LocationT
-drop procedure PROCavantAbo
-
+END
+//////////////////////////////////////////////////////////////////////////////////////////////
 create procedure PROCavantAbo
-@P_abo AboT
+@P_abo Abonnement_t
 AS
-DECLARE @v_prix PrixAboT
-DECLARE @v_nb NbFilmsT
-DECLARE @v_dureeLoc DureeT
+DECLARE @v_prix PrixAbonnement_t
+DECLARE @v_nb NbFilms_t
+DECLARE @v_dureeLoc Duree_t
 
 DECLARE C_avantAbo CURSOR FOR
 select prix,LocationMax,DureeLoc
@@ -544,18 +518,16 @@ IF @@FETCH_STATUS <> 0
     print 'L abonnement '+@P_abo+' ne contient aucune caracteristique'
 ELSE
 BEGIN
-    print 'Avec l abonnement '+@P_abo+' on peut louer pour '+@v_prix+' euros '+@v_nb+' films pendant une duree de '+@v_dureeLoc+' jours'
+    print 'Avec l abonnement '+@P_abo+' on peut louer pour '+@v_prix+' euros '+@v_nb+' films pENDant une duree de '+@v_dureeLoc+' jours'
 END
 CLOSE C_avantAbo
 DEALLOCATE C_avantAbo
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCretardNum
-
 create procedure PROCretardNum
 AS
-DECLARE @v_num NumAboT
+DECLARE @v_num Numero_t
 
 DECLARE C_retardNum CURSOR FOR
 select numero
@@ -583,12 +555,10 @@ CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
-
-drop procedure PROCretardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create procedure PROCretardPhys
 AS
-DECLARE @v_num NumAboT
+DECLARE @v_num Numero_t
 
 DECLARE C_retardPhys CURSOR FOR
 select numero
@@ -617,11 +587,9 @@ DEALLOCATE C_retardPhys
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrenouvellementNum
-
 create procedure PROCrenouvellementNum
 AS
-DECLARE @v_num NumAboT
+DECLARE @v_num Numero_t
 
 DECLARE C_renouvellementNum CURSOR FOR
 select numero
@@ -639,14 +607,14 @@ ELSE
 BEGIN
     While @@FETCH_STATUS = 0
     BEGIN
-    IF(@v_num=(select Abonné.numero from Abonné,LouerNum where Abonné.numero=LouerNum.numero and datefin is not null or datefin < GETDATE()))
+    IF(@v_num=(select Abonné.numero from Abonné,LouerNum where Abonné.Nom=LouerNum.Nom and Abonné.Prenom=LouerNum.Prenom and Abonné.DateNaiss= LouerNum.DateNaiss and datefin is not null or datefin < GETDATE()))
    	 print 'attention : location en cours pour l abonne numero '+@v_num
     ELSE
    	 IF(GETDATE()-(select renouvellement from Abonné where @v_num=numero)>7)
    	 BEGIN
    		 delete from Abonné where numero=@v_num
    		 delete from Personne where @v_num=(select numero from Abonné where Personne.Nom=Nom and Personne.Prenom=Prenom and Personne.DateNaiss= DateNaiss)
-   	 end
+   	 END
    	 ELSE
    		 print 'L abonne '+@v_num+' doit renouveller son abonnement'
    	 
@@ -658,11 +626,9 @@ DEALLOCATE C_renouvellementNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrenouvellementPhys
-
 create procedure PROCrenouvellementPhys
 AS
-DECLARE @v_num NumAboT
+DECLARE @v_num Numero_t
 
 DECLARE C_renouvellementPhys CURSOR FOR
 select numero
@@ -680,14 +646,14 @@ ELSE
 BEGIN
     While @@FETCH_STATUS = 0
     BEGIN
-    IF(@v_num=(select Abonné.numero from Abonné,LouerPhys where Abonné.numero=LouerPhys.numero and datefin is not null or datefin < GETDATE()))
+    IF(@v_num=(select Abonné.Numero from Abonné,LouerPhys where Abonné.Nom=LouerPhys.Nom and Abonné.Prenom=LouerPhys.Prenom and Abonné.DateNaiss= LouerPhys.DateNaiss and datefin is not null or datefin < GETDATE()))
    	 print 'attention : location en cours pour l abonne numero '+@v_num
     ELSE
    	 IF(GETDATE()-(select renouvellement from Abonné where @v_num=numero)>7)
    	 BEGIN
    		 delete from Abonné where numero=@v_num
    		 delete from Personne where @v_num=(select numero from Abonné where Personne.Nom=Nom and Personne.Prenom=Prenom and Personne.DateNaiss= DateNaiss)
-   	 end
+   	 END
    	 ELSE
    		 print 'L abonne '+@v_num+' doit renouveller son abonnement'
    	 
@@ -699,14 +665,13 @@ DEALLOCATE C_renouvellementPhys
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 create procedure PROCduree
-@P_nomR nomT,@P_prenomR prenomT
+@P_nomR nom_t,@P_prenomR prenom_t
 as
-DECLARE @v_film filmT
+DECLARE @v_film Film_t
 
 DECLARE C_duree CURSOR FOR
-select titreVF
+select Film.titreVF
 from Film,Version,Participer
 where Film.titreVF=Participer.titreVF and Film.titreVF=Version.titreVF and nom=@P_nomR and prenom=@P_prenomR and duree> '02:00:00' and role='Realisateur'
 
@@ -732,10 +697,11 @@ DEALLOCATE C_duree
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create procedure ProcVraiNom
-@P_filmVF FilmT
+@P_filmVF Film_t
 as
-Declare @v_titreVO FilmT
-begin
+Declare @v_titreVO Film_t
+BEGIN
     set @v_titreVO=(select titreVO from Film where @P_filmVF=titreVF)
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
-end
+END
+//////////////////////////////////////////////////////////////////////////////////////////////////
