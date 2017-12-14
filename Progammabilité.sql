@@ -14,6 +14,68 @@ create type prixT from real;
 create type dateNaiss_t from date;
 create type support_t from varchar(25);
 create type id_t from smallint;
+create type Etat_t from tinyint;
+//////////////////////////////////////////////////////////////////////////////////////////////////
+create or alter procedure VerifStockPhys
+@P_filmVF FilmT
+as
+Declare @v_Etat Etat_t
+DECLARE C_StockFilm CURSOR FOR
+select Etat
+from Physique
+where TitreVF = @P_filmVF
+BEGIN
+OPEN C_StockFilm
+FETCH NEXT FROM C_StockFilm into @v_Etat
+
+IF @@FETCH_STATUS <> 0
+	Begin
+	print 'ce film n''est pas en stock'
+	Return 0
+	End
+ELSE
+Begin
+	while @@FETCH_STATUS = 0
+		Begin
+			if(@v_Etat<5)
+			begin
+				print 'Ce film est en stock'
+				Return 1
+			end
+			else
+			FETCH NEXT FROM C_StockFilm into @v_Etat
+		End
+End
+CLOSE C_StockFilm
+DEALLOCATE C_StockFilm
+end
+exec VerifStockPhys Titanic
+//////////////////////////////////////////////////////////////////////////////////////////////////
+create or alter procedure VerifStockNum
+@P_filmVF FilmT
+as
+Declare @v_Film FilmT
+DECLARE C_StockFilm CURSOR FOR
+select titreVF
+from Numérique
+where TitreVF = @P_filmVF
+BEGIN
+OPEN C_StockFilm
+FETCH NEXT FROM C_StockFilm into @v_Film
+
+IF @@FETCH_STATUS <> 0
+	Begin
+    print 'ce film n''est pas en stock'
+	Return 0
+	End
+ELSE
+Begin
+    print 'Ce film est en stock'
+	Return 1
+End
+CLOSE C_StockFilm
+DEALLOCATE C_StockFilm
+end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create or alter procedure ProcPEGIreminder
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t,  @P_NumeroAbonne Numero_t
@@ -30,7 +92,8 @@ Return 0
 End
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-CREATE or alter TRIGGER PEGIreminderPhys
+
+CREATE or alter TRIGGER VerifLocationPhys
 ON LouerPhys
 FOR INSERT   
 AS 
@@ -41,12 +104,21 @@ Declare @v_Edition Edition_t = (select Edition from inserted)
 Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
 Declare @v_Pegi Integer
 Declare @v_Force Integer = (select Force from inserted)
-DECLARE @return_status int;    
+DECLARE @return_status_PEGI int;
+DECLARE @return_status_Stock int;     
 BEGIN 
+	exec @return_status_Stock = VerifStock @v_TitreVF
+	if(@return_status_Stock = 0)
+		begin
+			print ('Aucun Fim en stock Annulé');
+			ROLLBACK TRANSACTION;
+		end
+	else
+	begin
    if(@v_Force <> 2)
 	Begin
-		exec @return_status = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
-		if(@return_status = 1)
+		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		if(@return_status_PEGI = 1)
 		begin
 			print ('Insertion Annulé');
 			ROLLBACK TRANSACTION;
@@ -56,6 +128,7 @@ BEGIN
 	Begin
 		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
 	End
+	end
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,12 +143,21 @@ Declare @v_Edition Edition_t = (select Edition from inserted)
 Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
 Declare @v_Pegi Integer
 Declare @v_Force Integer = (select Force from inserted)
-DECLARE @return_status int;    
+DECLARE @return_status_PEGI int;
+DECLARE @return_status_Stock int;     
 BEGIN 
+	exec @return_status_Stock = VerifStock @v_TitreVF
+	if(@return_status_Stock = 0)
+		begin
+			print ('Aucun Fim en stock Annulé');
+			ROLLBACK TRANSACTION;
+		end
+	else
+	begin
    if(@v_Force <> 2)
 	Begin
-		exec @return_status = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
-		if(@return_status = 1)
+		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		if(@return_status_PEGI = 1)
 		begin
 			print ('Insertion Annulé');
 			ROLLBACK TRANSACTION;
@@ -85,6 +167,7 @@ BEGIN
 	Begin
 		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
 	End
+	end
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -658,5 +741,3 @@ begin
     set @v_titreVO=(select titreVO from Film where @P_filmVF=titreVF)
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 end
-
-
