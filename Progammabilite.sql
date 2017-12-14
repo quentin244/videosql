@@ -20,6 +20,11 @@ create type dateNaiss_t from date;
 create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
+create type adresse_t from varchar(52);
+create type telephone_t from smallint;
+create type renouvellement_t from date;
+create type anciennete_t from smallint;
+create type politique_t from tinyint;
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 
@@ -339,26 +344,29 @@ DEALLOCATE C_prixNum
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure EstAbo
-
 create procedure EstAbo
-@P_Prenom prenom_t, @P_Nom nom_t
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
+@P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
 AS
 Declare @v_Numero Numero_t
 Declare @true tinyint
-set @true = 1;
+Declare @abonne tinyint
+
 BEGIN
-    If (Exists (select * from Abonné where Nom=@P_Nom and Prenom = @P_Prenom))
-   	 set @true = 0;
-    BEGIN
-   	 If @true=0
-   		 BEGIN
-   		 set @v_Numero = (select Numero from Abonné where Nom=@P_Nom and Prenom = @P_Prenom);
-   		 print ''+str(@v_Numero);
-   		 END
-   	 ELSE
-   		 print 'Nup';
-    END
-END
+    IF (Exists (select * from Abonné where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
+    Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
+    Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement))
+	begin
+		print 'Le client '+@P_prenom+' '+@P_nom+' est abonne';
+		return 1;
+	end
+	ELSE
+	begin
+   		print 'Le client '+@P_prenom+' '+@P_nom+' n est pas abonne';
+		return 0;
+	end
+End
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AfficheEdition
 
@@ -790,3 +798,20 @@ BEGIN
 END
 
 exec ProcDRMreminder 'Titanic','2011-09-27','Belgique','Idée'
+
+
+create procedure ProcAbonner
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
+@P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
+as
+begin
+	if (estAbo @P_Prenom, @P_Nom nom_t, @P_DateNaiss , @P_Abonnement , @P_num , @P_adr ,@P_tel , @P_Renouvellement , @P_anciennete , @P_politique == 1)
+		update Abonné set Nom_Abonnement = @P_Abonnement  where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
+		Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
+		Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement
+	else
+		BEGIN
+			insert into Abonné values(@P_num,@P_adr,@P_tel,@P_Renouvellement,@P_anciennete,@P_politique,@P_Nom,@P_Prenom,@P_DateNaiss,@P_Abonnement)
+		END
+end
+	
