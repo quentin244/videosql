@@ -1,4 +1,4 @@
-﻿Insert into Film
+Insert into Film
 values ('Demandez la Permission aux Enfants','Demandez la Permission aux Enfants',NULL,'Réalisation : Éric Civanyan, Scénario et dialogues : Guillaume Breton et Éric Civanyan, d''après une idée originale de Guillaume Breton , Directeur de production : Gilles Loutfi, Producteur délégué : Manuel Munz, Chef décorateur : Jean-luc Raoul, Directeur de la photographie : Stéphane Cami, Mixage : François Groult, Directeur de la photographie : Stéphane Cami, Chef costumière : Anne Brault, Chef décorateur : Jean-luc Raoul, Chef monteur : Aurique Delannoy, Effets spéciaux (balançoire) : François Philippi, Luis Gutierrez-pino, Autres effets spéciaux numériques : L’Étude et la Supervision des Trucages (François Vagnon), Dessins/Illustrateur BD : François Duprat, Photographe de plateau : Arnaud Borrel, Musique originale : François Peyrony, Coordination : Laurent Juillet'
 ,'Trois familles sont confrontées à un seul et même problème : leurs enfants leur mènent la vie dure. Et puis un jour, la bêtise de trop et voilà que les adultes décident d''unir leurs forces pour rendre à ces petits diables la monnaie de leur désobéissance. Entre les enfants rois et les parents rebelles, désormais, tous les coups sont permis.','Français');
 insert into Film
@@ -409,129 +409,129 @@ insert into DistinguerFilm Values('2013-02-17','Intouchables','Goya', 'Meilleur 
 
 
 
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (3518,'Protéger et Servir',1,'DVD',25,'1974-05-12','France','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (21,'Protéger et Servir',5,'BlueRay',20,'1948-10-19','Corée','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (3519,'Protéger et Servir',4,'BlueRay',5,'2015-02-26','Atlantis','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (5197,'Protéger et Servir',1,'DVD',10,'2015-02-26','Atlantis','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (22222,'Protéger et Servir',0,'DVD',12,'1983-09-28','Etats-Unis','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (16989,'Protéger et Servir',2,'VHS',18,'1983-09-28','Etats-Unis','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (13219,'Avatar',0,'DVD',19,'1996-11-30','Panama','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (846,'Avatar',0,'DVD',24,'1996-11-30','Panama','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (21989,'Avatar',0,'DVD',11,'1999-03-18','France','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (15115,'Avatar',1,'BlueRay',16,'1999-03-18','France','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (9876,'Avatar',5,'DVD',2,'1978-01-12','Etats-Unis','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (11566,'Avatar',2,'BlueRay',80,'1928-07-22','Etats-Unis','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (15689,'Avatar',3,'DVD',15,'1928-07-22','Etats-Unis','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (25486,'Titanic',5,'BlueRay',16,'2016-01-06','Congo','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (18498,'Titanic',4,'BlueRay',34,'2014-08-29','France','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (1518,'Titanic',4,'BlueRay',21,'2011-09-27','Belgique','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (9870,'Titanic',3,'VHS',17,'2014-08-29','France','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (10001,'Titanic',4,'BlueRay',9,'2016-01-06','Congo','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (11010,'Titanic',0,'DVD',38,'2014-08-29','France','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (20200,'Intouchables',0,'VHS',75,'2010-06-19','Israel','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (31050,'Intouchables',2,'DVD',6,'2010-06-19','Israel','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (7802,'Intouchables',3,'DVD',16,'1938-12-31','Etats-Unis','Java');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (156,'Intouchables',4,'BlueRay',40,'1964-05-22','Etats-Unis','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (1,'Intouchables',0,'BlueRay',12,'1964-05-22','Etats-Unis','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (11,'Intouchables',1,'VHS',30,'1928-11-30','Etats-Unis','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (111,'Demandez la Permission aux Enfants',1,'BlueRay',10,'1968-04-01','France','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (1235,'Demandez la Permission aux Enfants',4,'DVD',42,'1990-10-23','Japon','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (444,'Demandez la Permission aux Enfants',2,'DVD',11,'1990-10-23','Japon','Bonus');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (568,'Demandez la Permission aux Enfants',3,'DVD',28,'1998-10-28','Palestine','Base');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (462,'Demandez la Permission aux Enfants',4,'BlueRay',10,'1998-03-25','Pangea','Idée');
-insert into Physique
+insert into Physique(id,TitreVF,Etat,Support,Prix,DateV,Pays,Edition)
 values (486,'Demandez la Permission aux Enfants',2,'BlueRay',5,'1990-10-23','Japon','Bonus');
 
 
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',12,'1974-05-12','France','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',32,'1968-04-01','France','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',20,'1902-01-11','France','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Avatar',10,'1999-03-18','France','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Avatar',11,'2002-06-19','France','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Avatar',12,'1978-01-12','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',21,'1986-02-21','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Titanic',11,'1955-06-11','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Avatar',32,'1928-07-22','Etats-Unis','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',12,'1964-05-22','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',5,'1991-03-26','Etats-Unis','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',9,'1990-08-24','Etats-Unis','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',14,'1983-09-28','Etats-Unis','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',20,'1974-04-30','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',27,'1938-12-31','Etats-Unis','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',28,'1928-11-30','Etats-Unis','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',29,'1948-10-19','Corée','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',26,'1990-10-23','Japon','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',17,'1995-12-28','Egypte','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Avatar',18,'1996-11-30','Panama','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',16,'1998-10-28','Palestine','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Intouchables',18,'2010-06-19','Israel','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Demandez la Permission aux Enfants',22,'1998-03-25','Pangea','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',61,'2015-02-26','Atlantis','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Titanic',22,'2011-09-27','Belgique','Idée');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Titanic',16,'2014-08-29','France','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',22,'2010-07-31','Danemark','Base');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Titanic',112,'2014-04-08','Russie','Java');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Protéger et Servir',14,'2015-05-04','Mali','Bonus');
-insert into Numérique
+insert into Numérique(TitreVF,Prix,DateV,Pays,Edition)
 values ('Titanic',25,'2016-01-06','Congo','Idée');
 
 insert into LouerPhys values('2017-01-01','2018-01-12',9870,'Titanic','2014-08-29','France','Java','Wowday','Henrie','1968-11-20', 0);
@@ -581,5 +581,3 @@ insert into LouerNum
 values ('2017-01-01','2018-01-12','Avatar','1996-11-30','Panama','Base' ,'Cherazade','Atila','1964-01-31', 0);
 insert into LouerNum
 values ('2017-01-01','2018-01-12','Titanic','2011-09-27','Belgique','Idée','Cherazade','Atila','1964-01-31', 0);
-
-

@@ -740,3 +740,42 @@ BEGIN
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROClitigePhys
+create procedure PROClitigePhys
+@P_numClient Numero_t
+AS
+Declare @v_nb int
+Declare @politique tinyint
+begin 
+	set @politique=0
+	set @v_nb=(select*
+	from Film,Version,Physique,LouerPhys,Abonnement,Abonne
+	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Version.pays=Numerique.pays and pays.Edition=Version.edition
+	and Physique.dateV=louerPhys.dateV and Physique.pays=louerPhys.pays and Physique.edition=louerPhys.edition and LouerPhys.numero=Abonne.numero
+	and Physique.id=LouerPhys.id and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
+	
+	if @v_nb >= 1
+		set @politique=@politique+1
+		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
+end
+
+drop procedure PROClitigeNum
+
+create procedure PROClitigeNum
+@P_numClient Numero_t
+AS
+Declare @v_nb int
+Declare @politique tinyint
+begin 
+	set @politique=0
+	set @v_nb=(select*
+	from Film,Version,Numerique,LouerNum,Abonnement,Abonne
+	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Version.pays=Numerique.pays and pays.Edition=Version.edition
+	and Numerique.dateV=louerNum.dateV and Numerique.pays=louerNum.pays and Numerique.edition=louerNum.edition and LouerNum.numero=Abonne.numero
+	and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
+	
+	if @v_nb >= 1
+		set @politique=@politique+1
+		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
+end
+

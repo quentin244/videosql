@@ -1,27 +1,7 @@
-﻿/*
-drop table DistinguerProfessionnel;
-drop table DistinguerFilm;
-drop table Distinguer;
-drop table Distinction;
-drop table Participer;
-drop table Sous_titrer;
-drop table Vocaliser;
-drop table Langue;
-drop table LouerPhys;
-drop table Physique;
-drop table LouerNum;
-drop table Numérique;
-drop table Version;
-drop table Film;
-drop table Professionnel;
-drop table Abonné;
-drop table Abonnement;
-drop table Personne;
-*/
 Create table Personne(
 Nom				varchar(25),
 Prenom			Varchar(25),
-DateNaiss			Date check(DateNaiss <= getdate()),
+DateNaiss		Date check(DateNaiss <= getdate()),
 Primary Key(Nom, Prenom, DateNaiss)
 );
 Create table Abonnement(
@@ -80,6 +60,7 @@ Prix 				smallint,
 DateV				date,
 Pays				varchar(25),
 Edition				varchar(25),
+DateInsert			date	default getdate(),
 primary key (TitreVF,DateV,Pays,Edition),
 constraint fk1_Numérique foreign key (TitreVF,DateV,Pays,Edition) references Version(TitreVF,DateV,Pays,Edition) on update cascade on delete cascade 
 );
@@ -108,6 +89,7 @@ Prix				float,
 DateV				date,
 Pays				varchar(25),
 Edition				varchar(25),
+DateInsert			date	default getdate(),
 primary key(id,Pays,DateV,Edition,TitreVF),
 constraint fk1_Physique foreign key (TitreVF,DateV,Pays,Edition) references Version(TitreVF,DateV,Pays,Edition) on update cascade on delete no action
 );         
