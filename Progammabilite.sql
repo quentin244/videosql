@@ -10,13 +10,13 @@ create type Prenom_t from varchar(25);
 create type PEGI_t from tinyint;
 create type TitreVF_t from varchar(52);
 create type TitreVO_t from varchar(52);
-create type DateV_t from date;
+create type DateV_t from datetime;
 create type Pays_t from varchar(25);
 create type Edition_t from varchar(25);
 create type nomDistinction_t from varchar(25);
 create type annee_t from int;
 create type prix_t from real;
-create type dateNaiss_t from date;
+create type dateNaiss_t from datetime;
 create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
@@ -344,6 +344,7 @@ DEALLOCATE C_prixNum
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure EstAbo
+
 create procedure EstAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
 @P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
@@ -366,7 +367,6 @@ BEGIN
 		return 0;
 	end
 End
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AfficheEdition
 
@@ -648,7 +648,7 @@ BEGIN
     IF(@v_num=(select Abonné.numero from Abonné,LouerNum where Abonné.Nom=LouerNum.Nom and Abonné.Prenom=LouerNum.Prenom and Abonné.DateNaiss= LouerNum.DateNaiss and datefin is not null or datefin < GETDATE()))
    	 print 'attention : location en cours pour l abonne numero '+@v_num
     ELSE
-   	 IF(GETDATE()-(select renouvellement from Abonné where @v_num=numero)>7)
+   	 IF((GETDATE()-(select renouvellement from Abonné where @v_num=numero))>7)
    	 BEGIN
    		 delete from Abonné where numero=@v_num
    		 delete from Personne where @v_num=(select numero from Abonné where Personne.Nom=Nom and Personne.Prenom=Prenom and Personne.DateNaiss= DateNaiss)
@@ -750,6 +750,7 @@ BEGIN
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROClitigePhys
+
 create procedure PROClitigePhys
 @P_numClient Numero_t
 AS
@@ -767,7 +768,7 @@ begin
 		set @politique=@politique+1
 		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
 end
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROClitigeNum
 
 create procedure PROClitigeNum
@@ -787,6 +788,8 @@ begin
 		set @politique=@politique+1
 		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
 end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcDRMreminder
 
 create or alter procedure ProcDRMreminder
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
@@ -796,22 +799,23 @@ BEGIN
 	Print 'DRM : ' + @v_DRM
 	Return 1
 END
-
-exec ProcDRMreminder 'Titanic','2011-09-27','Belgique','Idée'
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcAbonner
 
 create procedure ProcAbonner
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
 @P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
 as
-begin
-	if (estAbo @P_Prenom, @P_Nom nom_t, @P_DateNaiss , @P_Abonnement , @P_num , @P_adr ,@P_tel , @P_Renouvellement , @P_anciennete , @P_politique == 1)
-		update Abonné set Nom_Abonnement = @P_Abonnement  where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
-		Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
-		Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement
+BEGIN
+	if ([dbo].[EstAbo](@P_Prenom, @P_Nom, @P_DateNaiss , @P_Abonnement , @P_num , @P_adr ,@P_tel , @P_Renouvellement , @P_anciennete , @P_politique)= 1)
+		BEGIN
+			update Abonné set Nom_Abonnement = @P_Abonnement  where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
+			Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
+			Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement
+		END
 	else
 		BEGIN
 			insert into Abonné values(@P_num,@P_adr,@P_tel,@P_Renouvellement,@P_anciennete,@P_politique,@P_Nom,@P_Prenom,@P_DateNaiss,@P_Abonnement)
 		END
-end
-	
+END
+//////////////////////////////////////////////////////////////////////////////////////////////////

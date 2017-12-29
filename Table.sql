@@ -14,7 +14,7 @@ Create table Abonné(
 Numero			smallint Unique,
 Adresse			varchar(52),
 Téléphone			integer,
-Renouvellement		date,
+Renouvellement		datetime,
 Ancienneté			smallint,
 Politique			tinyint,
 Nom				varchar(25),
