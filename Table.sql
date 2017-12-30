@@ -1,7 +1,7 @@
 Create table Personne(
 Nom				varchar(25),
 Prenom			Varchar(25),
-DateNaiss		Date check(DateNaiss <= getdate()),
+DateNaiss		datetime check(DateNaiss <= getdate()),
 Primary Key(Nom, Prenom, DateNaiss)
 );
 Create table Abonnement(
@@ -19,7 +19,7 @@ Ancienneté			smallint,
 Politique			tinyint,
 Nom				varchar(25),
 Prenom			varchar(25),
-DateNaiss			date check((YEAR(getdate()) - YEAR(DateNaiss)) >= 6),
+DateNaiss			datetime check((YEAR(getdate()) - YEAR(DateNaiss)) >= 6),
 Nom_Abonnement		varchar(25),
 primary key (Nom,Prenom,DateNaiss),
 Constraint fk1_abonne Foreign key(Nom, Prenom, DateNaiss) references Personne(Nom, Prenom, DateNaiss)	on delete cascade,
@@ -31,7 +31,7 @@ Biographie			text,
 Caractéristique		text,
 Nom				varchar(25),
 Prenom			varchar(25),
-DateNaiss			date check(DateNaiss <= getdate()),
+DateNaiss			datetime check(DateNaiss <= getdate()),
 primary key (Nom, Prenom, DateNaiss),
 Constraint fk1_pro Foreign key(Nom, Prenom, DateNaiss) references Personne(Nom, Prenom, DateNaiss) on delete cascade
 );
@@ -44,7 +44,7 @@ Resume			text,
 VO				varchar(25) 
 );
 Create table Version(
-DateV				date NOT NULL check(DateV <= getdate()),
+DateV				datetime NOT NULL check(DateV <= getdate()),
 Pays				varchar(25) NOT NULL ,
 Edition				varchar(25) NOT NULL ,
 DRM				varchar(25) ,
@@ -57,23 +57,23 @@ constraint fk1_version foreign key (TitreVF) references Film(TitreVf) on update 
 Create table Numérique(
 TitreVF				varchar(52),
 Prix 				smallint,
-DateV				date,
+DateV				datetime,
 Pays				varchar(25),
 Edition				varchar(25),
-DateInsert			date	default getdate(),
+DateInsert			datetime	default getdate(),
 primary key (TitreVF,DateV,Pays,Edition),
 constraint fk1_Numérique foreign key (TitreVF,DateV,Pays,Edition) references Version(TitreVF,DateV,Pays,Edition) on update cascade on delete cascade 
 );
 Create table LouerNum(
-DateDebut			date check(DateDebut <= getdate()),
-DateFin			date,
+DateDebut			datetime check(DateDebut <= getdate()),
+DateFin				datetime,
 TitreVF				varchar(52),
-DateV				date,
+DateV				datetime,
 Pays				varchar(25),
 Edition				varchar(25),
 Nom				varchar(25),
 Prenom			varchar(25),
-DateNaiss			date,
+DateNaiss			datetime,
 Force 				Integer Default(0),
 Primary Key(Nom, Prenom, DateNaiss, TitreVF, DateDebut),
 constraint checkNum check(DateFin > DateDebut),
@@ -86,24 +86,24 @@ TitreVF				varchar(52),
 Etat				tinyint,
 Support			varchar(25),
 Prix				float,
-DateV				date,
+DateV				datetime,
 Pays				varchar(25),
 Edition				varchar(25),
-DateInsert			date	default getdate(),
+DateInsert			datetime	default getdate(),
 primary key(id,Pays,DateV,Edition,TitreVF),
 constraint fk1_Physique foreign key (TitreVF,DateV,Pays,Edition) references Version(TitreVF,DateV,Pays,Edition) on update cascade on delete no action
 );         
 Create table LouerPhys(
-DateDebut			date check(DateDebut <= getdate()),
-DateFin			date ,
-id				smallint,
+DateDebut			datetime check(DateDebut <= getdate()),
+DateFin				datetime ,
+id					smallint,
 TitreVF				varchar(52),
-DateV				date,
+DateV				datetime,
 Pays				varchar(25),
 Edition				varchar(25),
 Nom 				varchar(25),
 Prenom			varchar(25),
-DateNaiss 			date,
+DateNaiss 			datetime,
 Force 				Integer Default(0),
 Primary Key(Nom, Prenom, DateNaiss, TitreVF, DateDebut),
 constraint checkPhy check(DateFin > DateDebut),
@@ -114,7 +114,7 @@ Create table Langue(
 Langue			varchar(25) primary key
 );
 Create table Vocaliser(
-DateV				date not null,
+DateV				datetime not null,
 Pays				varchar(25) not null,
 Edition				varchar(25) not null,
 TitreVF				varchar(52) NOT NULL ,
@@ -125,7 +125,7 @@ constraint fk2_Vocaliser foreign key (Langue) references langue(Langue) on updat
 );
 Create table Sous_Titrer(
 Langue			varchar(25) NOT NULL ,
-DateV				date NOT NULL ,
+DateV				datetime NOT NULL ,
 Pays				varchar(25) NOT NULL ,
 Edition				varchar(25) NOT NULL ,
 TitreVF				varchar(52) NOT NULL ,
@@ -138,7 +138,7 @@ Role      			Varchar (25) ,
 TitreVF   			Varchar (52) NOT NULL ,
 Nom       			Varchar (25) NOT NULL ,
 Prenom    			Varchar (25) NOT NULL ,
-DateNaiss 			Date NOT NULL,
+DateNaiss 			datetime NOT NULL,
 Primary Key(Nom, Prenom, DateNaiss, Role, TitreVF),
 constraint fk1_Participer foreign key (TitreVF) references Film(TitreVF) on update cascade on delete no action,
 constraint fk2_Participer foreign key (Nom,Prenom,DateNaiss) references Personne(Nom ,Prenom ,DateNaiss) on update cascade on delete no action
@@ -150,11 +150,11 @@ Lieu      			varchar(25) NOT NULL ,
 constraint pk_Distinction PRIMARY KEY (Nom ,Categorie ,Lieu)
 );
 Create table Distinguer(
-DateD				date check(DateD <= getdate()),
+DateD				datetime check(DateD <= getdate()),
 TitreVF				varchar(52) NOT NULL ,
-Nom				varchar(25) NOT NULL ,
-Prenom			varchar(25) NOT NULL ,
-DateNaiss			date NOT NULL,
+Nom					varchar(25) NOT NULL ,
+Prenom				varchar(25) NOT NULL ,
+DateNaiss			datetime NOT NULL,
 Nom_Distinction		varchar(25) NOT NULL ,
 Categorie			varchar(25) NOT NULL ,
 Lieu				varchar(25) NOT NULL ,
@@ -164,9 +164,9 @@ constraint fk2_distinguer FOREIGN KEY (Nom, Prenom, DateNaiss) REFERENCES Person
 constraint fk3_distinguer FOREIGN KEY (Nom_Distinction,Categorie,Lieu) REFERENCES Distinction(Nom,Categorie,Lieu) on update cascade on delete no action
 );
 Create table DistinguerFilm(
-DateD				date check(DateD <= getdate()),
+DateD				datetime check(DateD <= getdate()),
 TitreVF				varchar(52) NOT NULL ,
-Nom				varchar(25) NOT NULL ,
+Nom					varchar(25) NOT NULL ,
 Categorie			varchar(25) NOT NULL ,
 Lieu				varchar(25) NOT NULL ,
 Primary Key(Nom, Categorie, Lieu, TitreVF),
@@ -174,13 +174,13 @@ constraint fk1_distinguerFilm FOREIGN KEY (TitreVF) REFERENCES Film(TitreVF) on 
 constraint fk2_distinguerFilm FOREIGN KEY (Nom,Categorie,Lieu) REFERENCES Distinction(Nom,Categorie,Lieu) on update cascade on delete no action
 );
 Create table DistinguerProfessionnel(
-DateD				date check(DateD <= getdate()),
-Nom				varchar(25) NOT NULL ,
+DateD				datetime check(DateD <= getdate()),
+Nom					varchar(25) NOT NULL ,
 Categorie			varchar(25) NOT NULL ,
 Lieu				varchar(25) NOT NULL ,
 Nom_Personne		varchar(25) NOT NULL ,
-Prenom			varchar(25) NOT NULL ,
-DateNaiss			date NOT NULL ,
+Prenom				varchar(25) NOT NULL ,
+DateNaiss			datetime NOT NULL ,
 Primary Key(Nom_Personne, Prenom, DateNaiss, Nom, Categorie, Lieu),
 constraint fk1_distinguerPro FOREIGN KEY (Nom,Prenom,DateNaiss) REFERENCES Personne(Nom,Prenom,DateNaiss) on update cascade on delete no action,
 constraint fk2_distinguerPro FOREIGN KEY (Nom,Categorie,Lieu) REFERENCES Distinction(Nom,Categorie,Lieu) on update cascade on delete no action
