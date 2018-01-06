@@ -39,6 +39,11 @@ drop type dateNaiss_t ;
 drop type support_t; 
 drop type id_t ;
 drop type Etat_t;
+drop type adresse_t;
+drop type anciennete_t;
+drop type politique_t;
+drop type renouvellement_t;
+drop type telephone_t;
 //////////////
 drop procedure PROCavantAbo
 drop procedure EstAbo
