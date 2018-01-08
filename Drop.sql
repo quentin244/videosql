@@ -30,7 +30,6 @@ drop type PEGI_t;
 drop type TitreVF_t ;
 drop type TitreVO_t;
 drop type DateV_t;
-drop type Pays_t;
 drop type Edition_t;
 drop type nomDistinction_t;
 drop type annee_t; 
@@ -44,6 +43,8 @@ drop type anciennete_t;
 drop type politique_t;
 drop type renouvellement_t;
 drop type telephone_t;
+drop type Langue_t;
+drop type DateLoc_t;
 //////////////
 drop procedure PROCavantAbo
 drop procedure EstAbo
