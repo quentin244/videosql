@@ -11,7 +11,6 @@ create type PEGI_t from tinyint;
 create type TitreVF_t from varchar(52);
 create type TitreVO_t from varchar(52);
 create type DateV_t from datetime;
-create type Pays_t from varchar(25);
 create type Edition_t from varchar(25);
 create type nomDistinction_t from varchar(25);
 create type annee_t from int;
@@ -25,10 +24,16 @@ create type telephone_t from smallint;
 create type renouvellement_t from datetime;
 create type anciennete_t from smallint;
 create type politique_t from tinyint;
+create type Langue_t from Varchar(25)
+create type DateLoc_t from datetime
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
+<<<<<<< HEAD
 create or alter procedure VerifStockPhys
+=======
+create procedure VerifStockPhys
+>>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 @P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
 declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
@@ -178,7 +183,6 @@ AS
 Declare @v_Support support_t
 Declare @v_TitreVF TitreVF_t
 Declare @v_Date DateV_t
-Declare @v_Pays Pays_t
 Declare @v_Edition Edition_t
 DECLARE C_Film CURSOR FOR
 	select  Support, TitreVF, DateV, Edition 
@@ -194,7 +198,11 @@ BEGIN
 		print 'Film non louable: '
 		while @@FETCH_STATUS = 0
 		BEGIN
+<<<<<<< HEAD
 			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) +' ' + @v_Pays + ' ' + @v_Edition
+=======
+			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) + ' ' + @v_Edition
+>>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 			FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Edition
 		END
 	END
@@ -322,7 +330,11 @@ END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcDRMreminder
 /*trigger print DRM*/
+<<<<<<< HEAD
 create or alter procedure ProcDRMreminder
+=======
+create procedure ProcDRMreminder
+>>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 AS 
 Declare @v_DRM varchar(25) = (Select DRM From Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Edition = @P_Edition)
@@ -331,6 +343,7 @@ BEGIN
 	Return 1
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 
 create or alter procedure PROCfilmLouer
 @P_DateLoc DateV_t
@@ -392,3 +405,87 @@ Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 BEGIN
 	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu) + ':'
 END
+=======
+drop procedure ProcDureeMaxLoc
+
+create procedure ProcDureeMaxLoc
+@P_nomAbo Abonnement_t
+as
+declare @v_dureeMax duree_t
+begin
+	set @v_dureeMax=(select max(DureeLoc)
+	    		 from abonnement
+			 where nom=@P_nomAbo)
+	if @v_dureeMax is null
+	   print 'La duree maximale de l abonnement '+@P_nomAbo+' n est pas renseignee'
+	else
+	   print 'La duree maximale de l abonnement '+@P_nomAbo+' est de '+str(@v_dureeMax)+' jours'
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcRetourLocPhys
+
+create procedure ProcRetourLocPhys
+@P_dateFin Dateloc_t
+as
+declare @v_numero Numero_t
+
+declare C_locPhys cursor for
+select numero
+from abonne a,louerPhys l
+where a.numero=l.numero and l.DateFin=@P_dateFin
+
+begin
+
+open C_retourLocPhys
+fetch next from C_retourLocPhys into @v_numero
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a une location physique a rendre le '+@P_dateFin
+else
+	begin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) physique(s) le '+@P_dateFin
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_numero
+		fetch next from C_retourLocPhys into @v_numero
+		end
+	end
+close C_retourLocPhys
+deallocate C_retourLocPhys
+
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcRetourLocNum
+
+create procedure ProcRetourLocNum
+@P_dateFin Dateloc_t
+as
+declare @v_numero Numero_t
+
+declare C_locPhys cursor for
+select numero
+from abonne a,louerNum l
+where a.numero=l.numero and l.DateFin=@P_dateFin
+
+begin
+
+open C_retourLocNum
+fetch next from C_retourLocNum into @v_numero
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a une location numerique a rendre le '+@P_dateFin
+else
+	begin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) numerique(s) le '+@P_dateFin
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_numero
+		fetch next from C_retourLocNum into @v_numero
+		end
+	end
+close C_retourLocNum
+deallocate C_retourLocNum
+
+end
+
+>>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d

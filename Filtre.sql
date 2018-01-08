@@ -11,7 +11,6 @@ create type PEGI_t from tinyint;
 create type TitreVF_t from varchar(52);
 create type TitreVO_t from varchar(52);
 create type DateV_t from datetime;
-create type Pays_t from varchar(25);
 create type Edition_t from varchar(25);
 create type nomDistinction_t from varchar(25);
 create type annee_t from int;
@@ -25,6 +24,8 @@ create type telephone_t from smallint;
 create type renouvellement_t from datetime;
 create type anciennete_t from smallint;
 create type politique_t from tinyint;
+create type Langue_t from Varchar(25)
+create type DateLoc_t from datetime
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrealisateur
 /* prend un real et liste ses films en stock*/ 
@@ -248,3 +249,135 @@ BEGIN
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLangueBandeSon
+
+create procedure ProcLangueBandeSon
+@P_titre TitreVF_t
+as
+declare @v_langue Langue_t
+
+declare C_langueBS cursor for
+select l.langue
+from langue l,vocaliser v
+where l.langue=v.langue and v.titreVF=@P_titre
+
+begin
+
+open C_langueBS
+fetch next from C_langueBS into @P_titre
+
+if @@FETCH_STATUS <> 0
+   print 'Aucune langue disponible pour la bande son du film '+@P_titre
+else
+   print 'Liste des langues disponibles pour le film '+@P_titre
+   while @@FETCH_STATUS = 0
+   begin
+    print @v_langue
+    fetch next from C_langueBS into @v_langue
+end
+close C_langueBS
+deallocate C_langueBS
+
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLangueSousTitre
+
+create procedure ProcLangueSousTitre
+@P_titre TitreVF_t
+as
+declare @v_langue Langue_t
+
+declare C_langueST cursor for
+select l.langue
+from langue l,sous_titrer s
+where l.langue=s.langue and s.titreVF=@P_titre
+
+begin
+
+open C_langueST
+fetch next from C_langueBS into @P_titre
+
+if @@FETCH_STATUS <> 0
+   print 'Aucune langue disponible pour la bande son du film '+@P_titre
+else
+	begin
+	print 'Liste des langues disponibles pour le film '+@P_titre
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_langue
+		fetch next from C_langueST into @v_langue
+		end	
+	end
+close C_langueST
+deallocate C_langueST
+
+end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLocPhys
+
+create procedure ProcLocPhys
+@P_dateDebut Dateloc_t
+as
+declare @v_numero Numero_t
+
+declare C_locPhys cursor for
+select numero
+from abonne a,louerPhys l
+where a.numero=l.numero and l.DateDebut=@P_dateDebut
+
+begin
+
+open C_locPhys
+fetch next from C_locPhys into @v_numero
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a effectue de location physique le '+@P_dateDebut
+else
+	begin
+	print 'Liste des abonnes qui ont effectue au moins une location physique le '+@P_dateDebut
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_numero
+		fetch next from C_locPhys into @v_numero
+		end
+	end
+close C_locPhys
+deallocate C_locPhys
+
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLocNum
+
+create procedure ProcLocNum
+@P_dateDebut Dateloc_t
+as
+declare @v_numero Numero_t
+
+declare C_locNum cursor for
+select a.Numero
+from Abonné a, LouerPhys l
+where a.Numero=l.Numero and l.DateDebut=@P_dateDebut
+
+begin
+
+open C_locNum
+fetch next from C_locNum into @v_numero
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a effectue de location numerique le '+@P_dateDebut
+else
+	begin
+	print 'Liste des abonnes qui ont effectue au moins une location numerique le '+@P_dateDebut
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_numero
+		fetch next from C_locNum into @v_numero
+		end
+	end
+close C_locNum
+deallocate C_locNum
+
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+

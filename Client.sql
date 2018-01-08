@@ -11,7 +11,6 @@ create type PEGI_t from tinyint;
 create type TitreVF_t from varchar(52);
 create type TitreVO_t from varchar(52);
 create type DateV_t from datetime;
-create type Pays_t from varchar(25);
 create type Edition_t from varchar(25);
 create type nomDistinction_t from varchar(25);
 create type annee_t from int;
@@ -25,6 +24,8 @@ create type telephone_t from smallint;
 create type renouvellement_t from datetime;
 create type anciennete_t from smallint;
 create type politique_t from tinyint;
+create type Langue_t from Varchar(25)
+create type DateLoc_t from datetime
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure CheckAbo
 /*Prend Prenom Nom est liste abonne*/
@@ -266,8 +267,7 @@ begin
 	set @politique=0
 	set @v_nb=(select*
 	from Film,Version,Physique,LouerPhys,Abonnement,Abonne
-	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Version.pays=Numerique.pays and pays.Edition=Version.edition
-	and Physique.dateV=louerPhys.dateV and Physique.pays=louerPhys.pays and Physique.edition=louerPhys.edition and LouerPhys.numero=Abonne.numero
+	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Physique.dateV=louerPhys.dateV and Physique.edition=louerPhys.edition and LouerPhys.numero=Abonne.numero
 	and Physique.id=LouerPhys.id and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
 	
 	if @v_nb >= 1
@@ -286,8 +286,7 @@ begin
 	set @politique=0
 	set @v_nb=(select*
 	from Film,Version,Numerique,LouerNum,Abonnement,Abonne
-	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Version.pays=Numerique.pays and pays.Edition=Version.edition
-	and Numerique.dateV=louerNum.dateV and Numerique.pays=louerNum.pays and Numerique.edition=louerNum.edition and LouerNum.numero=Abonne.numero
+	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Numerique.dateV=louerNum.dateV and Numerique.edition=louerNum.edition and LouerNum.numero=Abonne.numero
 	and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
 	
 	if @v_nb >= 1
@@ -314,3 +313,18 @@ BEGIN
 		END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcAbonneAdresse
+
+create procedure ProcAbonneAdresse
+@P_numero Numero_t
+as
+declare @v_adresse adresse_t
+begin
+	set @v_adresse=(select adresse
+	    		from abonne
+			where numero=@P_numero)
+	if @v_adresse is null
+	   print 'L adresse de l abonne numero '+str(@P_numero)+' n est pas renseignee'
+	else
+	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
+end
