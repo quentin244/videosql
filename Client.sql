@@ -174,87 +174,58 @@ DEALLOCATE C_retardPhys
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrenouvellementNum
+drop procedure PROCrenouvellementAbo
 /*list doit payer*/
-create procedure PROCrenouvellementNum
+create or alter procedure PROCrenouvellementAbo
 AS
-DECLARE @v_num Numero_t
-
-DECLARE C_renouvellementNum CURSOR FOR
-select numero
-from Abonne
-where renouvellement < getdate()
-
+DECLARE @v_nom Nom_t
+DECLARE @v_prenom prenom_t
+DECLARE @v_dateNaiss dateNaiss_t
+DECLARE C_renouvellement CURSOR FOR
+	select Nom, Prenom, DateNaiss
+	from Abonné
+	where renouvellement < getdate()
 BEGIN
-
-OPEN C_renouvellementNum
-FETCH NEXT FROM C_renouvellementNum into @v_num
-
-IF @@FETCH_STATUS <> 0
-    print 'Aucun Abonne n a besoin de renouveler son abonnement'
-ELSE
-BEGIN
-    While @@FETCH_STATUS = 0
-    BEGIN
-    IF(@v_num=(select Abonné.numero from Abonné,LouerNum where Abonné.Nom=LouerNum.Nom and Abonné.Prenom=LouerNum.Prenom and Abonné.DateNaiss= LouerNum.DateNaiss and datefin is not null or datefin < GETDATE()))
-   	 print 'attention : location en cours pour l abonne numero '+@v_num
-    ELSE
-   	 IF((GETDATE()-(select renouvellement from Abonné where @v_num=numero))>7)
-   	 BEGIN
-   		 delete from Abonné where numero=@v_num
-   		 delete from Personne where @v_num=(select numero from Abonné where Personne.Nom=Nom and Personne.Prenom=Prenom and Personne.DateNaiss= DateNaiss)
-   	 END
-   	 ELSE
-   		 print 'L abonne '+@v_num+' doit renouveller son abonnement'
-   	 
-    FETCH NEXT FROM C_renouvellementNum into @v_num
-    END
+	OPEN C_renouvellement
+	FETCH NEXT FROM C_renouvellement into @v_nom, @v_prenom, @v_dateNaiss
+	IF @@FETCH_STATUS <> 0
+	Begin
+		print 'Aucun Abonne n a besoin de renouveler son abonnement'
+	End
+	ELSE
+	BEGIN
+		While @@FETCH_STATUS = 0
+		BEGIN
+			IF(Exists(select * from LouerNum where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is not null or DateFin < GETDATE()))
+			Begin
+   				print 'attention : location en cours pour l abonne '+@v_nom+ ' '+@v_prenom
+			End
+			ELSE
+			Begin
+				IF(Exists(select * from LouerPhys where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is not null or DateFin < GETDATE()))
+				Begin
+   					print 'attention : location en cours pour l abonne '+@v_nom+ ' '+ @v_prenom
+				End
+				ELSE
+				Begin
+   					IF((GETDATE()-(select renouvellement from Abonné where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss))>7)
+   					BEGIN
+   						delete from Abonné where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss
+   						delete from Personne where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss
+   					END
+   					ELSE
+					Begin
+   						print 'L abonne '+@v_nom+ ' '+ @v_prenom+' doit renouveller son abonnement' 
+					End
+				End
+			End
+			FETCH NEXT FROM C_renouvellement into @v_nom, @v_prenom, @v_dateNaiss
+		END
+	END
+	CLOSE C_renouvellement
+	DEALLOCATE C_renouvellement
 END
-CLOSE C_renouvellementNum
-DEALLOCATE C_renouvellementNum
 
-END
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrenouvellementPhys
-/*list doit payer*/
-create procedure PROCrenouvellementPhys
-AS
-DECLARE @v_num Numero_t
-
-DECLARE C_renouvellementPhys CURSOR FOR
-select numero
-from Abonne
-where renouvellement < getdate()
-
-BEGIN
-
-OPEN C_renouvellementPhys
-FETCH NEXT FROM C_renouvellementPhys into @v_num
-
-IF @@FETCH_STATUS <> 0
-    print 'Aucun Abonne n a besoin de renouveler son abonnement'
-ELSE
-BEGIN
-    While @@FETCH_STATUS = 0
-    BEGIN
-    IF(@v_num=(select Abonné.Numero from Abonné,LouerPhys where Abonné.Nom=LouerPhys.Nom and Abonné.Prenom=LouerPhys.Prenom and Abonné.DateNaiss= LouerPhys.DateNaiss and datefin is not null or datefin < GETDATE()))
-   	 print 'attention : location en cours pour l abonne numero '+@v_num
-    ELSE
-   	 IF(GETDATE()-(select renouvellement from Abonné where @v_num=numero)>7)
-   	 BEGIN
-   		 delete from Abonné where numero=@v_num
-   		 delete from Personne where @v_num=(select numero from Abonné where Personne.Nom=Nom and Personne.Prenom=Prenom and Personne.DateNaiss= DateNaiss)
-   	 END
-   	 ELSE
-   		 print 'L abonne '+@v_num+' doit renouveller son abonnement'
-   	 
-    FETCH NEXT FROM C_renouvellementPhys into @v_num
-    END
-END
-CLOSE C_renouvellementPhys
-DEALLOCATE C_renouvellementPhys
-
-END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROClitigePhys
 /*list retard de plus de 7j*/
@@ -285,7 +256,7 @@ Declare @politique tinyint
 begin 
 	set @politique=0
 	set @v_nb=(select*
-	from Film,Version,Numerique,LouerNum,Abonnement,Abonne
+	from Film,Version,Numérique,LouerNum,Abonnement,Abonné
 	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Numerique.dateV=louerNum.dateV and Numerique.edition=louerNum.edition and LouerNum.numero=Abonne.numero
 	and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
 	
@@ -293,6 +264,7 @@ begin
 		set @politique=@politique+1
 		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
 end
+exec PROClitigeNum 99
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcAbonner
 /*insert dans abonne*/
@@ -301,17 +273,34 @@ create procedure ProcAbonner
 @P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
 as
 BEGIN
-	if ([dbo].[EstAbo](@P_Prenom, @P_Nom, @P_DateNaiss , @P_Abonnement , @P_num , @P_adr ,@P_tel , @P_Renouvellement , @P_anciennete , @P_politique)= 1)
+	if (exists( select * from Abonné where Prenom = @P_Prenom and Nom = @P_Nom and DateNaiss = @P_DateNaiss))
 		BEGIN
-			update Abonné set Nom_Abonnement = @P_Abonnement  where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
-			Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
-			Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement
+			update Abonné set Nom_Abonnement = @P_Abonnement, Renouvellement = @P_Renouvellement 
+			where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss
 		END
 	else
 		BEGIN
-			insert into Abonné values(@P_num,@P_adr,@P_tel,@P_Renouvellement,@P_anciennete,@P_politique,@P_Nom,@P_Prenom,@P_DateNaiss,@P_Abonnement)
+			if(Exists(select * from Personne where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss))
+				insert into Abonné values(@P_num,@P_adr,@P_tel,@P_Renouvellement,@P_anciennete,@P_politique,@P_Nom,@P_Prenom,@P_DateNaiss,@P_Abonnement)
+			else
+			begin
+				insert into Personne values (@P_Nom, @P_Prenom, @P_DateNaiss)
+				insert into Abonné values(@P_num,@P_adr,@P_tel,@P_Renouvellement,@P_anciennete,@P_politique,@P_Nom,@P_Prenom,@P_DateNaiss,@P_Abonnement)
+			end
 		END
 END
+
+exec ProcAbonner 'Quentin', 
+'Joubert',
+'1997-02-04',
+'Asticot', 
+99, 
+'37 rue louis Morard 75014 Paris', 
+069, 
+'2019-08-01', 
+1,
+1
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcAbonneAdresse
 
@@ -321,10 +310,30 @@ as
 declare @v_adresse adresse_t
 begin
 	set @v_adresse=(select adresse
-	    		from abonne
+	    		from abonné
 			where numero=@P_numero)
 	if @v_adresse is null
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' n est pas renseignee'
 	else
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
 end
+
+create or alter procedure PROCModifierAbo
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
+AS
+BEGIN
+	IF(@P_Abonnement = 'NULL')
+	Begin
+		delete from Abonné where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss
+   		delete from Personne where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss
+
+   		print 'Les modification on bien ete enregistré'
+	END
+	ELSE
+	Begin
+		update Abonné set Nom_Abonnement = @P_Abonnement, Renouvellement = GETDATE() 
+			where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss
+
+   		print 'Les modification on bien ete enregistré'
+	END
+END

@@ -330,6 +330,7 @@ BEGIN
 	Print 'DRM : ' + @v_DRM
 	Return 1
 END
+exec ProcDRMreminder 'Protéger et Servir', '1974-05-12', 'Bonus'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 drop procedure ProcDureeMaxLoc
@@ -351,82 +352,86 @@ end
 drop procedure ProcRetourLocPhys
 
 create procedure ProcRetourLocPhys
-@P_dateFin Dateloc_t
+@P_dateFin DateV_t
 as
 declare @v_numero Numero_t
 
-declare C_locPhys cursor for
-select numero
-from abonne a,louerPhys l
-where a.numero=l.numero and l.DateFin=@P_dateFin
+declare @v_nom Nom_t
+declare @v_prenom Prenom_t
+declare @v_dateNaiss dateNaiss_t
+
+declare C_retourLocPhys cursor for
+select distinct (Nom), Prenom, DateNaiss
+from LouerPhys
+where DateFin=@P_dateFin
 
 begin
-
 open C_retourLocPhys
-fetch next from C_retourLocPhys into @v_numero
+fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
 
 if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a une location physique a rendre le '+@P_dateFin
+   print 'Aucun abonne n a une location physique a rendre le '+convert(varchar, @P_dateFin)
 else
 	begin
-	print 'Liste des abonnes qui doivent rentre leur(s) location(s) physique(s) le '+@P_dateFin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) physique(s) le '+ convert(varchar, @P_dateFin)
 	while @@FETCH_STATUS = 0
 		begin
-		print @v_numero
-		fetch next from C_retourLocPhys into @v_numero
+		print @v_prenom+' ' +@v_nom 
+		fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
 		end
 	end
 close C_retourLocPhys
 deallocate C_retourLocPhys
-
 end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcRetourLocNum
 
 create procedure ProcRetourLocNum
-@P_dateFin Dateloc_t
+@P_dateFin DateV_t
 as
 declare @v_numero Numero_t
 
-declare C_locPhys cursor for
-select numero
-from abonne a,louerNum l
-where a.numero=l.numero and l.DateFin=@P_dateFin
+declare @v_nom Nom_t
+declare @v_prenom Prenom_t
+declare @v_dateNaiss dateNaiss_t
+
+declare C_retourLocNum cursor for
+select distinct (Nom), Prenom, DateNaiss
+from LouerNum
+where DateFin=@P_dateFin
 
 begin
-
 open C_retourLocNum
-fetch next from C_retourLocNum into @v_numero
+fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
 
 if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a une location numerique a rendre le '+@P_dateFin
+   print 'Aucun abonne n a une location numerique a rendre le '+convert(varchar, @P_dateFin)
 else
 	begin
-	print 'Liste des abonnes qui doivent rentre leur(s) location(s) numerique(s) le '+@P_dateFin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) numerique(s) le '+ convert(varchar, @P_dateFin)
 	while @@FETCH_STATUS = 0
 		begin
-		print @v_numero
-		fetch next from C_retourLocNum into @v_numero
+		print @v_prenom+' ' +@v_nom 
+		fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
 		end
 	end
 close C_retourLocNum
 deallocate C_retourLocNum
-
 end
 
+exec ProcRetourLocNum '2018-12-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 create or alter procedure PROCfilmLouer
-@P_DateLoc DateV_t
 AS 
 Declare @v_TitreVF TitreVF_t
 DECLARE C_Film CURSOR FOR
 	select distinct(LouerPhys.TitreVF)
 	from LouerPhys, LouerNum
-	where (LouerPhys.DateDebut < @P_DateLoc 
-	and LouerPhys.DateFin > @P_DateLoc)
-	or( LouerNum.DateDebut < @P_DateLoc 
-	and LouerNum.DateFin > @P_DateLoc)
+	where (LouerPhys.DateDebut < GETDATE() 
+	and LouerPhys.DateFin > GETDATE())
+	or( LouerNum.DateDebut < GETDATE()  
+	and LouerNum.DateFin > GETDATE())
 BEGIN
 	open C_Film
 	FETCH NEXT FROM C_Film into @v_TitreVF
@@ -434,7 +439,7 @@ BEGIN
 		print 'Aucun Film louer'
 	Else
 	BEGIN
-		print 'Film en cours de location le ' + convert(varchar, @P_DateLoc) + ':'
+		print 'Film en cours de location le ' + convert(varchar, GETDATE()) + ':'
 		while @@FETCH_STATUS = 0
 		BEGIN
 			print  ' ' + @v_TitreVF 
@@ -444,7 +449,7 @@ BEGIN
 	CLOSE C_Film
 	DEALLOCATE C_Film
 END
-
+exec PROCfilmLouer
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 create or alter procedure PROCRenduLocation
@@ -477,7 +482,8 @@ AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 BEGIN
-	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu) + ':'
+	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu)
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
