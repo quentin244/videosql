@@ -116,7 +116,7 @@ DECLARE @v_num Numero_t
 
 DECLARE C_retardNum CURSOR FOR
 select numero
-from Abonne,Abonnement,LouerNum
+from Abonné,Abonnement,LouerNum
 where Abonnement.nom=Abonne.nom_Abonnement and LouerNum.Numero=Abonne.numero
 and Abonnement.LocationMax+LouerNum.DateDebut >=Abonnement.DureeLoc
 
@@ -140,23 +140,30 @@ CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
+exec PROCretardNum
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCretardPhys
 /*list abonne en retard*/
 create procedure PROCretardPhys
 AS
 DECLARE @v_num Numero_t
+DECLARE @v_nom Nom_t
+DECLARE @v_prenom prenom_t
+DECLARE @v_dateNaiss dateNaiss_t
+
+Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 
 DECLARE C_retardPhys CURSOR FOR
-select numero
-from Abonne,Abonnement,LouerNum
+select Nom, Prenom, DateNaiss
+from Abonné,Abonnement,LouerNum
 where Abonnement.nom=Abonne.nom_Abonnement and LouerPhys.Numero=Abonne.numero
 and Abonnement.LocationMax+LouerPhys.DateDebut >=Abonnement.DureeLoc
 
 BEGIN
 
 OPEN C_retardPhys
-FETCH NEXT FROM C_retardPhys into @v_num
+FETCH NEXT FROM C_retardPhys into @v_nom, @v_prenom, @v_dateNaiss
 
 IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
@@ -165,13 +172,12 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_num
-   	 FETCH NEXT FROM C_retardPhys into @v_num
+   	 print @v_nom + ' '+ @v_prenom
+   	 FETCH NEXT FROM C_retardPhys into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
-
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrenouvellementAbo
