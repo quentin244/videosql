@@ -113,17 +113,20 @@ drop procedure PROCretardNum
 create procedure PROCretardNum
 AS
 DECLARE @v_num Numero_t
+DECLARE @v_nom Nom_t
+DECLARE @v_prenom prenom_t
+DECLARE @v_dateNaiss dateNaiss_t
 
 DECLARE C_retardNum CURSOR FOR
-select numero
-from Abonné,Abonnement,LouerNum
-where Abonnement.nom=Abonne.nom_Abonnement and LouerNum.Numero=Abonne.numero
-and Abonnement.LocationMax+LouerNum.DateDebut >=Abonnement.DureeLoc
+Select Nom, Prenom, DateNaiss
+From LouerNum
+where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+
 
 BEGIN
 
 OPEN C_retardNum
-FETCH NEXT FROM C_retardNum into @v_num
+FETCH NEXT FROM C_retardNum into @v_nom, @v_prenom, @v_dateNaiss
 
 IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
@@ -132,8 +135,8 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_num
-   	 FETCH NEXT FROM C_retardNum into @v_num
+   	 print @v_nom + ' '+ @v_prenom
+   	 FETCH NEXT FROM C_retardNum into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
 CLOSE C_retardNum
@@ -151,14 +154,10 @@ DECLARE @v_nom Nom_t
 DECLARE @v_prenom prenom_t
 DECLARE @v_dateNaiss dateNaiss_t
 
-Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
-Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
-
 DECLARE C_retardPhys CURSOR FOR
-select Nom, Prenom, DateNaiss
-from Abonné,Abonnement,LouerNum
-where Abonnement.nom=Abonne.nom_Abonnement and LouerPhys.Numero=Abonne.numero
-and Abonnement.LocationMax+LouerPhys.DateDebut >=Abonnement.DureeLoc
+Select Nom, Prenom, DateNaiss
+From LouerPhys
+where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
 
 BEGIN
 
@@ -179,6 +178,7 @@ END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
+exec PROCretardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrenouvellementAbo
 /*list doit payer*/
