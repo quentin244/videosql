@@ -29,11 +29,7 @@ create type DateLoc_t from datetime
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
-<<<<<<< HEAD
-create or alter procedure VerifStockPhys
-=======
 create procedure VerifStockPhys
->>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 @P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
 declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
@@ -198,11 +194,7 @@ BEGIN
 		print 'Film non louable: '
 		while @@FETCH_STATUS = 0
 		BEGIN
-<<<<<<< HEAD
-			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) +' ' + @v_Pays + ' ' + @v_Edition
-=======
 			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) + ' ' + @v_Edition
->>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 			FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Edition
 		END
 	END
@@ -330,11 +322,7 @@ END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcDRMreminder
 /*trigger print DRM*/
-<<<<<<< HEAD
-create or alter procedure ProcDRMreminder
-=======
 create procedure ProcDRMreminder
->>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
 @P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 AS 
 Declare @v_DRM varchar(25) = (Select DRM From Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Edition = @P_Edition)
@@ -343,69 +331,7 @@ BEGIN
 	Return 1
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-<<<<<<< HEAD
 
-create or alter procedure PROCfilmLouer
-@P_DateLoc DateV_t
-AS 
-Declare @v_TitreVF TitreVF_t
-DECLARE C_Film CURSOR FOR
-	select distinct(LouerPhys.TitreVF)
-	from LouerPhys, LouerNum
-	where (LouerPhys.DateDebut < @P_DateLoc 
-	and LouerPhys.DateFin > @P_DateLoc)
-	or( LouerNum.DateDebut < @P_DateLoc 
-	and LouerNum.DateFin > @P_DateLoc)
-BEGIN
-	open C_Film
-	FETCH NEXT FROM C_Film into @v_TitreVF
-	if @@FETCH_STATUS <> 0
-		print 'Aucun Film louer'
-	Else
-	BEGIN
-		print 'Film en cours de location le ' + convert(varchar, @P_DateLoc) + ':'
-		while @@FETCH_STATUS = 0
-		BEGIN
-			print  ' ' + @v_TitreVF 
-			FETCH NEXT FROM C_Film into @v_TitreVF
-		END
-	END
-	CLOSE C_Film
-	DEALLOCATE C_Film
-END
-
-
-create or alter procedure PROCRenduLocation
-@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
-AS
-Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
-Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
-Declare @v_Date DateV_t = (select GETDATE())
-Declare @v_DateRendu DateV_t = (select DateFin from LouerPhys
-		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
-		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
-BEGIN
-	if (@v_DateRendu = NULL)
-	BEGIN
-		update LouerPhys set DateFin = @v_Date 
-		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
-		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
-	END
-	ELSE
-	BEGIN
-		print  'ERREUR : ce fim a deja une date de rendu'  
-	END
-END
-
-create or alter procedure PROCDateFinPrevu
-@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
-AS
-Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
-Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
-BEGIN
-	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu) + ':'
-END
-=======
 drop procedure ProcDureeMaxLoc
 
 create procedure ProcDureeMaxLoc
@@ -488,4 +414,70 @@ deallocate C_retourLocNum
 
 end
 
->>>>>>> 7b62422ae6619d88f225670d3c3c9eb85cef205d
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+create or alter procedure PROCfilmLouer
+@P_DateLoc DateV_t
+AS 
+Declare @v_TitreVF TitreVF_t
+DECLARE C_Film CURSOR FOR
+	select distinct(LouerPhys.TitreVF)
+	from LouerPhys, LouerNum
+	where (LouerPhys.DateDebut < @P_DateLoc 
+	and LouerPhys.DateFin > @P_DateLoc)
+	or( LouerNum.DateDebut < @P_DateLoc 
+	and LouerNum.DateFin > @P_DateLoc)
+BEGIN
+	open C_Film
+	FETCH NEXT FROM C_Film into @v_TitreVF
+	if @@FETCH_STATUS <> 0
+		print 'Aucun Film louer'
+	Else
+	BEGIN
+		print 'Film en cours de location le ' + convert(varchar, @P_DateLoc) + ':'
+		while @@FETCH_STATUS = 0
+		BEGIN
+			print  ' ' + @v_TitreVF 
+			FETCH NEXT FROM C_Film into @v_TitreVF
+		END
+	END
+	CLOSE C_Film
+	DEALLOCATE C_Film
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+create or alter procedure PROCRenduLocation
+@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
+AS
+Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
+Declare @v_Date DateV_t = (select GETDATE())
+Declare @v_DateRendu DateV_t = (select DateFin from LouerPhys
+		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
+		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+BEGIN
+	if (@v_DateRendu = NULL)
+	BEGIN
+		update LouerPhys set DateFin = @v_Date 
+		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
+		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
+	END
+	ELSE
+	BEGIN
+		print  'ERREUR : ce fim a deja une date de rendu'  
+	END
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+create or alter procedure PROCDateFinPrevu
+@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
+AS
+Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
+BEGIN
+	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu) + ':'
+END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
