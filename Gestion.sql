@@ -384,4 +384,11 @@ BEGIN
 	END
 END
 
-exec PROCRenduLocation
+create or alter procedure PROCDateFinPrevu
+@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
+AS
+Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
+BEGIN
+	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu) + ':'
+END
