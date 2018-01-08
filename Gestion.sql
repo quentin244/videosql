@@ -29,11 +29,11 @@ create type politique_t from tinyint;
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
 create or alter procedure VerifStockPhys
-@P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
+@P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
-declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
-declare @v_DateDebut date = (select DateDebut from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
-Declare @v_Etat Etat_t = (select Etat from Physique where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
+declare @v_DateDebut date = (select DateDebut from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
+Declare @v_Etat Etat_t = (select Etat from Physique where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
 	if(@v_Etat<5)
 	BEGIN
@@ -59,11 +59,11 @@ END
 drop procedure VerifStockNum
 /* Prend la clef primaire d'un film et print si il louable/pas */
 create procedure VerifStockNum
-@P_filmVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
+@P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
-Declare @v_Film TitreVF_t = (select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+Declare @v_Film TitreVF_t = (select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
-	IF (not exists(select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition))
+	IF (not exists(select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition))
 	BEGIN
 		print 'ce film n''est pas en stock'
 		Return 0
@@ -79,10 +79,10 @@ END
 drop procedure ProcPEGIreminder
 /* lie au trigger PEGI  */
 create procedure ProcPEGIreminder
-@P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t,  @P_NumeroAbonne Numero_t
+@P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t,  @P_NumeroAbonne Numero_t
 AS 
 Declare @v_AgeP int = (Year(getdate())- Year((Select DateNaiss From Abonné Where Numero = @P_NumeroAbonne)))
-Declare @v_PegiF int = (Select PEGI FROM Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+Declare @v_PegiF int = (Select PEGI FROM Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
 IF (@v_AgeP < @v_PegiF)
     	BEGIN
@@ -101,7 +101,6 @@ AS
 Declare @v_Id id_t = (select id from inserted) 
 Declare @v_TitreVF TitreVF_t = (select TitreVF from inserted)
 Declare @v_Date DateV_t = (select DateV from inserted)
-Declare @v_Pays Pays_t = (select Pays from inserted)
 Declare @v_Edition Edition_t = (select Edition from inserted)
 Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
 Declare @v_Pegi Integer
@@ -109,7 +108,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
+	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Edition
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Film en stock Annulé');
@@ -119,7 +118,7 @@ BEGIN
 	BEGIN
    if(@v_Force <> 2)
 	BEGIN
-		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
 		if(@return_status_PEGI = 1)
 		BEGIN
 			print ('Insertion Annulé');
@@ -128,7 +127,7 @@ BEGIN
 	END
 	else
 	BEGIN
-		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
 	END
 	END
 END
@@ -141,7 +140,6 @@ FOR INSERT
 AS 
 Declare @v_TitreVF TitreVF_t = (select TitreVF from inserted)
 Declare @v_Date DateV_t = (select DateV from inserted)
-Declare @v_Pays Pays_t = (select Pays from inserted)
 Declare @v_Edition Edition_t = (select Edition from inserted)
 Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
 Declare @v_Pegi Integer
@@ -149,7 +147,7 @@ Declare @v_Force Integer = (select Force from inserted)
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Pays, @v_Edition
+	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Edition
 	if(@return_status_Stock = 0)
 		BEGIN
 			print ('Aucun Fim en stock Annulé');
@@ -159,7 +157,7 @@ BEGIN
 	BEGIN
    if(@v_Force <> 2)
 	BEGIN
-		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		exec @return_status_PEGI = ProcPEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
 		if(@return_status_PEGI = 1)
 		BEGIN
 			print ('Insertion Annulé');
@@ -168,7 +166,7 @@ BEGIN
 	END
 	else
 	BEGIN
-		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Pays, @v_Edition, @v_NumAbo
+		exec ProcPEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
 	END
 	END
 END
@@ -183,12 +181,12 @@ Declare @v_Date DateV_t
 Declare @v_Pays Pays_t
 Declare @v_Edition Edition_t
 DECLARE C_Film CURSOR FOR
-	select  Support, TitreVF, DateV, Pays, Edition 
+	select  Support, TitreVF, DateV, Edition 
 	from Physique
 	where Etat = 5;
 BEGIN
 	open C_Film
-	FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
+	FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Edition
 	if @@FETCH_STATUS <> 0
 		print 'Aucun Film non louable'
 	Else
@@ -197,7 +195,7 @@ BEGIN
 		while @@FETCH_STATUS = 0
 		BEGIN
 			print @v_Support  + ' ' + @v_TitreVF + ' ' + convert(Varchar, @v_Date) +' ' + @v_Pays + ' ' + @v_Edition
-			FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Pays, @v_Edition
+			FETCH NEXT FROM C_Film into @v_Support, @v_TitreVF, @v_Date, @v_Edition
 		END
 	END
 	CLOSE C_Film
@@ -275,17 +273,15 @@ create procedure rachat
 AS
 Declare @v_Edition Edition_t
 Declare @v_TitreVF TitreVF_t
-Declare @v_Pays    Pays_t
 Declare @v_DateV DateV_t
 set @v_Edition = (Select Edition From Physique Where id = @P_Id);
 set @v_TitreVF = (Select TitreVF From Physique where id = @P_Id);
-set @v_Pays = (Select Pays From Physique Where id = @P_Id);
 set @v_DateV = (Select DateV From Physique Where id = @P_Id);
 BEGIN
-delete From Physique Where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV;
+delete From Physique Where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV;
 print'id suppr'
-IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV)=0)
-    Delete From Version Where Edition = @v_Edition and TitreVF = @v_TitreVF and Pays = @v_Pays and DateV = @v_DateV
+IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV)=0)
+    Delete From Version Where Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV
     print'version suppr'
     BEGIN
     IF ((select COUNT(*) From Version Where @v_TitreVF = TitreVF)=0)
@@ -327,11 +323,65 @@ END
 drop procedure ProcDRMreminder
 /*trigger print DRM*/
 create or alter procedure ProcDRMreminder
-@P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Pays Pays_t, @P_Edition Edition_t
+@P_TitreVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 AS 
-Declare @v_DRM varchar(25) = (Select DRM From Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Pays = @P_Pays and Edition = @P_Edition)
+Declare @v_DRM varchar(25) = (Select DRM From Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
 	Print 'DRM : ' + @v_DRM
 	Return 1
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+create or alter procedure PROCfilmLouer
+@P_DateLoc DateV_t
+AS 
+Declare @v_TitreVF TitreVF_t
+DECLARE C_Film CURSOR FOR
+	select distinct(LouerPhys.TitreVF)
+	from LouerPhys, LouerNum
+	where (LouerPhys.DateDebut < @P_DateLoc 
+	and LouerPhys.DateFin > @P_DateLoc)
+	or( LouerNum.DateDebut < @P_DateLoc 
+	and LouerNum.DateFin > @P_DateLoc)
+BEGIN
+	open C_Film
+	FETCH NEXT FROM C_Film into @v_TitreVF
+	if @@FETCH_STATUS <> 0
+		print 'Aucun Film louer'
+	Else
+	BEGIN
+		print 'Film en cours de location le ' + convert(varchar, @P_DateLoc) + ':'
+		while @@FETCH_STATUS = 0
+		BEGIN
+			print  ' ' + @v_TitreVF 
+			FETCH NEXT FROM C_Film into @v_TitreVF
+		END
+	END
+	CLOSE C_Film
+	DEALLOCATE C_Film
+END
+
+
+create or alter procedure PROCRenduLocation
+@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
+AS
+Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
+Declare @v_Date DateV_t = (select GETDATE())
+Declare @v_DateRendu DateV_t = (select DateFin from LouerPhys
+		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
+		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+BEGIN
+	if (@v_DateRendu = NULL)
+	BEGIN
+		update LouerPhys set DateFin = @v_Date 
+		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
+		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
+	END
+	ELSE
+	BEGIN
+		print  'ERREUR : ce fim a deja une date de rendu'  
+	END
+END
+
+exec PROCRenduLocation
