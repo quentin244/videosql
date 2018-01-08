@@ -26,6 +26,12 @@ create type anciennete_t from smallint;
 create type politique_t from tinyint;
 create type Langue_t from Varchar(25)
 create type DateLoc_t from datetime
+
+create type DateDist_t from datetime;
+
+create type CategorieDist_t from varchar(52)
+
+create type  from varchar(25)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrealisateur
 /* prend un real et liste ses films en stock*/ 
@@ -380,4 +386,30 @@ deallocate C_locNum
 
 end
 //////////////////////////////////////////////////////////////////////////////////////////////////
+/* site pour le film */
 
+create Procedure procSiteFilm
+@P_titre TitreVF_t
+as
+declare @v_site Site_t
+begin
+    set @v_site=(select site from film where titreVF=@P_titre)
+    if @v_site is null
+       print 'Le site du film '+@P_titre+' n est pas renseigne'
+    else
+       print 'Le site du film '+@P_titre+' est : ' +@v_site
+end
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+create type Caracteristique_t from text
+drop caracteristique
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+/* insertion d'un film primé */
+
+create procedure procFilmPrime
+@P_DateD DateDist_t,@P_TitreVF TitreVF_t,@P_NomDist	nomDistinction_t,@P_Categorie CategorieDist_t,@P_Lieu lieuDistinction_t
+as
+begin
+insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
+end	

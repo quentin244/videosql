@@ -418,7 +418,60 @@ else
 close C_retourLocNum
 deallocate C_retourLocNum
 end
+///////////////////////////////////////////////
+drop procedure procNbFilmEnStock
 
+<<<<<<< HEAD
+/*nombre de films en stock */
+create procedure procNbFilmEnStock
+AS 
+Declare @v_nbFilmStock smallint
+BEGIN
+	set @v_nbFilmStock=(select distinct(count(*)) from physique)+(select distinct(count(*)) from numerique)
+	Print 'il y a '+str(@v_nbFilmStock)+' films en stock'
+	Return @v_nbFilmStock
+END
+
+//////////////////////////////////////////////////
+/* nombre de films loues */
+create procedure procNbFilmLoue
+as
+declare @v_nbFilmLoue smallint
+
+begin
+	set @v_nbFilmLoue=(select distinct(*)) from louerPhys where datefin is null)+(select count(distinct(*)) from louerNum where datefin is null)
+	print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
+	return @v_nbFilmLoue
+end
+
+//////////////////////////////////////////////
+drop procedure procNbFilmLouable
+
+create procedure procNbFilmLouable
+as
+declare @v_nbFilmLouable smallint
+
+begin
+	set @v_nbFilmLouable=(select distintcount(*) from physique where etat <= 5)+(select count(*) from numerique)+(select count(*) from louerPhys where datefin is not null)+(select count(*) from louerNum where datefin is not null)
+	print 'il y a '+str(@v_nbFilmLouable)+' film(s) loue(s)'
+end
+
+create type Site_t from varchar(100)
+create type TitreVF_t from varchar(52)
+drop procedure procSiteFilm
+
+create Procedure procSiteFilm
+@P_titre TitreVF_t
+as
+declare @v_site Site_t
+begin
+    set @v_site=(select site from film where titreVF=@P_titre)
+    if @v_site is null
+       print 'Le site du film '+@P_titre+' n est pas renseigne'
+    else
+       print 'Le site du film '+@P_titre+' est : ' +@v_site
+end
+=======
 exec ProcRetourLocNum '2018-12-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -486,4 +539,38 @@ BEGIN
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+create procedure ProcNbFilmStock 
+as 
+declare @v_nbFilmStock integer 
+begin 
+    set @v_nbFilmStock=(select distinct(count(*)) from numérique )+(select distinct(count(*)) from physique) 
+    print 'il y a '+str(@v_nbFilmStock)+' film(s) en stock'
+    return @v_nbFilmStock
+end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+create procedure ProcNbFilmLoue
+as 
+declare @v_nbFilmLoue integer 
+begin 
+    set @v_nbFilmLoue=(select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum) 
+    print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
+    return @v_nbFilmLoue
+end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+create procedure ProcNbFilmLouable
+as
+declare @v_nbFilmLouable integer
+begin
+    set @v_nbFilmLouable=((select distinct(count(*)) from numérique )+(select distinct(count(*)) from physique where etat <= 5))-((select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum where dateFin is null))
+    print 'il y a '+str(@v_nbFilmLoue)+' film(s) louables(s)'
+    return @v_nbFilmLouable
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 
