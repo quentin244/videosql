@@ -461,6 +461,7 @@ end
 
 create type Site_t from varchar(100)
 create type TitreVF_t from varchar(52)
+//////////////////////////////////////////////////////////////////////////
 drop procedure procSiteFilm
 
 create Procedure procSiteFilm
@@ -577,7 +578,7 @@ begin
     set @v_nbFilmLouable=((select distinct(count(*)) from numérique )+(select distinct(count(*)) from physique where etat <= 5))-((select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum where dateFin is null))
     print 'il y a '+str(@v_nbFilmLoue)+' film(s) louables(s)'
     return @v_nbFilmLouable
-
+end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 /*trending drm */
