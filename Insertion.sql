@@ -604,59 +604,59 @@ insert into Numérique(TitreVF,Prix,DateV,Edition,DateInsert)
 values ('Titanic',25,'2016-01-06','Idée','2016-12-13');
 
 insert into LouerPhys
-values('2017-01-01','2018-01-12',9870,'Titanic','2014-08-29','Java','Wowday','Henrie','1968-11-20', 0);
+values('2017-01-01',NULL,9870,'Titanic','2014-08-29','Java','Wowday','Henrie','1968-11-20', 0);
 insert into LouerPhys
-values('2017-05-22','2018-01-15',11,'Intouchables','1928-11-30','Base','Wowday','Henry','1968-10-17', 0);
+values('2017-05-22',NULL,11,'Intouchables','1928-11-30','Base','Wowday','Henry','1968-10-17', 0);
 insert into LouerPhys
-values('2017-06-30','2018-02-01',111,'Demandez la Permission aux Enfants','1968-04-01','Bonus','Whereday','Charle','1968-09-16', 0);
+values('2017-06-30',NULL,111,'Demandez la Permission aux Enfants','1968-04-01','Bonus','Whereday','Charle','1968-09-16', 0);
 insert into LouerPhys
-values('2017-03-16','2018-03-13',444,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Whenday','Thebase','1984-08-11', 0);
+values('2017-03-16',NULL,444,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Whenday','Thebase','1984-08-11', 0);
 insert into LouerPhys
-values('2017-07-20','2018-02-05',15115,'Avatar','1999-03-18','Java','Allo','Mais','1929-06-21', 0);
+values('2017-07-20',NULL,15115,'Avatar','1999-03-18','Java','Allo','Mais','1929-06-21', 0);
 insert into LouerPhys
-values('2017-06-30','2018-01-14',21,'Protéger et Servir','1948-10-19','Idée','Albert','Camus','1952-01-01', 0);
+values('2017-06-30',NULL,21,'Protéger et Servir','1948-10-19','Idée','Albert','Camus','1952-01-01', 0);
 insert into LouerPhys
-values('2017-10-21','2018-02-15',22222,'Protéger et Servir','1983-09-28','Java','Wenenensday','Drop','2010-07-14', 0);
+values('2017-10-21',NULL,22222,'Protéger et Servir','1983-09-28','Java','Wenenensday','Drop','2010-07-14', 0);
 insert into LouerPhys
-values('2017-11-18','2018-03-01',18498,'Titanic','2014-08-29','Java','Tuesday','Mark','1999-06-19', 0);
+values('2017-11-18',NULL,18498,'Titanic','2014-08-29','Java','Tuesday','Mark','1999-06-19', 0);
 insert into LouerPhys
-values('2017-11-16','2018-02-01',1235,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Monday','Fetch','1968-05-11', 0);
+values('2017-11-16',NULL,1235,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Monday','Fetch','1968-05-11', 0);
 insert into LouerPhys
-values('2017-08-12','2018-01-15',486,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Soppyday','Joe','1948-04-04', 0);
+values('2017-08-12',NULL,486,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Soppyday','Joe','1948-04-04', 0)
 
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Protéger et Servir','1974-05-12','Bonus','Weshwesh','lesamis','1995-04-26', 0);
+values ('2017-01-01',NULL,'Protéger et Servir','1974-05-12','Bonus','Weshwesh','lesamis','1995-04-26', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Demandez la Permission aux Enfants','1968-04-01','Bonus', 'Weshwesh','lesamis','1995-04-26', 0);
+values ('2017-01-01',NULL,'Demandez la Permission aux Enfants','1968-04-01','Bonus', 'Weshwesh','lesamis','1995-04-26', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Intouchables','1902-01-11','Bonus','Allo','Mais','1929-06-21', 0);
+values ('2017-01-01',NULL,'Intouchables','1902-01-11','Bonus','Allo','Mais','1929-06-21', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Avatar','1999-03-18','Java','Allo','Mais','1929-06-21', 0);
+values ('2017-01-01',NULL,'Avatar','1999-03-18','Java','Allo','Mais','1929-06-21', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Avatar','2002-06-19','Base','Christ','Jesus','1984-08-22', 0);
+values ('2017-01-01',NULL,'Avatar','2002-06-19','Base','Christ','Jesus','1984-08-22', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Avatar','1978-01-12','Base','Weshwesh','lesamis','1995-04-26', 0);
+values ('2017-01-01',NULL,'Avatar','1978-01-12','Base','Weshwesh','lesamis','1995-04-26', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Demandez la Permission aux Enfants','1986-02-21','Base','Christ','Jesus','1984-08-22', 0);
+values ('2017-01-01',NULL,'Demandez la Permission aux Enfants','1986-02-21','Base','Christ','Jesus','1984-08-22', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Titanic','1955-06-11','Base','Christ','Jesus','1984-08-22', 0);
+values ('2017-01-01',NULL,'Titanic','1955-06-11','Base','Christ','Jesus','1984-08-22', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Avatar','1928-07-22','Java','Jenova','Sephiroth','1963-10-23', 0);
+values ('2017-01-01',NULL,'Avatar','1928-07-22','Java','Jenova','Sephiroth','1963-10-23', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Intouchables','1964-05-22','Base','Jenova','Sephiroth','1963-10-23', 0);
+values ('2017-01-01',NULL,'Intouchables','1964-05-22','Base','Jenova','Sephiroth','1963-10-23', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Intouchables','1991-03-26','Idée','Ramnstein','Leindeneim','1901-12-30', 0);
+values ('2017-01-01',NULL,'Intouchables','1991-03-26','Idée','Ramnstein','Leindeneim','1901-12-30', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Intouchables','1990-08-24','Java','Cherazade','Atila','1964-01-31', 0);
+values ('2017-01-01',NULL,'Intouchables','1990-08-24','Java','Cherazade','Atila','1964-01-31', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Protéger et Servir','1983-09-28','Java','Jenova','Sephiroth','1963-10-23', 0);
+values ('2017-01-01',NULL,'Protéger et Servir','1983-09-28','Java','Jenova','Sephiroth','1963-10-23', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Demandez la Permission aux Enfants','1974-04-30','Base','Jenova','Sephiroth','1963-10-23', 0);
+values ('2017-01-01',NULL,'Demandez la Permission aux Enfants','1974-04-30','Base','Jenova','Sephiroth','1963-10-23', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Protéger et Servir','1948-10-19','Idée','Ramnstein','Leindeneim','1901-12-30', 0);
+values ('2017-01-01',NULL,'Protéger et Servir','1948-10-19','Idée','Ramnstein','Leindeneim','1901-12-30', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Demandez la Permission aux Enfants','1990-10-23','Bonus','Ramnstein','Leindeneim','1901-12-30', 0);
+values ('2017-01-01',NULL,'Demandez la Permission aux Enfants','1990-10-23','Bonus','Ramnstein','Leindeneim','1901-12-30', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Avatar','1996-11-30','Base' ,'Cherazade','Atila','1964-01-31', 0);
+values ('2017-01-01',NULL,'Avatar','1996-11-30','Base' ,'Cherazade','Atila','1964-01-31', 0);
 insert into LouerNum
-values ('2017-01-01','2018-01-12','Titanic','2011-09-27','Idée','Cherazade','Atila','1964-01-31', 0);
+values ('2017-01-01',NULL,'Titanic','2011-09-27','Idée','Cherazade','Atila','1964-01-31', 0);

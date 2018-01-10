@@ -178,3 +178,34 @@ Primary Key(Nom_Personne, Prenom, DateNaiss, Nom, Categorie, Lieu),
 constraint fk1_distinguerPro FOREIGN KEY (Nom,Prenom,DateNaiss) REFERENCES Personne(Nom,Prenom,DateNaiss) on update cascade on delete no action,
 constraint fk2_distinguerPro FOREIGN KEY (Nom,Categorie,Lieu) REFERENCES Distinction(Nom,Categorie,Lieu) on update cascade on delete no action
 );
+
+create type Abonnement_t from varchar(25);
+create type PrixAbonnement_t from smallint;
+create type NbFilms_t from smallint;
+create type Duree_t from integer;
+create type Numero_t from smallint;
+create type Film_t from varchar(52);
+create type Real_t from varchar(25);
+create type Nom_t from varchar(25);
+create type Prenom_t from varchar(25);
+create type PEGI_t from tinyint;
+create type TitreVF_t from varchar(52);
+create type TitreVO_t from varchar(52);
+create type DateV_t from datetime;
+create type Edition_t from varchar(25);
+create type nomDistinction_t from varchar(25);
+create type annee_t from int;
+create type prix_t from real;
+create type dateNaiss_t from datetime;
+create type support_t from varchar(25);
+create type id_t from smallint;
+create type Etat_t from tinyint;
+create type adresse_t from varchar(52);
+create type telephone_t from smallint;
+create type renouvellement_t from datetime;
+create type anciennete_t from smallint;
+create type politique_t from tinyint;
+create type Langue_t from Varchar(25)
+create type DateLoc_t from datetime
+create type DRM_t from varchar(25);
+create type Site_t from varchar(100)

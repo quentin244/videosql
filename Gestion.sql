@@ -1,33 +1,3 @@
-create type Abonnement_t from varchar(25);
-create type PrixAbonnement_t from smallint;
-create type NbFilms_t from smallint;
-create type Duree_t from integer;
-create type Numero_t from smallint;
-create type Film_t from varchar(52);
-create type Real_t from varchar(25);
-create type Nom_t from varchar(25);
-create type Prenom_t from varchar(25);
-create type PEGI_t from tinyint;
-create type TitreVF_t from varchar(52);
-create type TitreVO_t from varchar(52);
-create type DateV_t from datetime;
-create type Edition_t from varchar(25);
-create type nomDistinction_t from varchar(25);
-create type annee_t from int;
-create type prix_t from real;
-create type dateNaiss_t from datetime;
-create type support_t from varchar(25);
-create type id_t from smallint;
-create type Etat_t from tinyint;
-create type adresse_t from varchar(52);
-create type telephone_t from smallint;
-create type renouvellement_t from datetime;
-create type anciennete_t from smallint;
-create type politique_t from tinyint;
-create type Langue_t from Varchar(25)
-create type DateLoc_t from datetime
-create type DRM_t from varchar(25);
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
@@ -392,11 +362,9 @@ create procedure ProcRetourLocNum
 @P_dateFin DateV_t
 as
 declare @v_numero Numero_t
-
 declare @v_nom Nom_t
 declare @v_prenom Prenom_t
 declare @v_dateNaiss dateNaiss_t
-
 declare C_retourLocNum cursor for
 select distinct (Nom), Prenom, DateNaiss
 from LouerNum
@@ -422,14 +390,12 @@ deallocate C_retourLocNum
 end
 ///////////////////////////////////////////////
 drop procedure procNbFilmEnStock
-
-<<<<<<< HEAD
 /*nombre de films en stock */
 create procedure procNbFilmEnStock
 AS 
 Declare @v_nbFilmStock smallint
 BEGIN
-	set @v_nbFilmStock=(select distinct(count(*)) from physique)+(select distinct(count(*)) from numerique)
+	set @v_nbFilmStock=(select distinct(count(*)) from physique)+(select distinct(count(*)) from Numérique)
 	Print 'il y a '+str(@v_nbFilmStock)+' films en stock'
 	Return @v_nbFilmStock
 END
@@ -442,7 +408,7 @@ as
 declare @v_nbFilmLoue smallint
 
 begin
-	set @v_nbFilmLoue=(select distinct(*)) from louerPhys where datefin is null)+(select count(distinct(*)) from louerNum where datefin is null)
+	set @v_nbFilmLoue=(select distinct(count(*)) from louerPhys where datefin is null)+(select distinct(count(*)) from louerNum where datefin is null)
 	print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
 	return @v_nbFilmLoue
 end
@@ -455,12 +421,9 @@ as
 declare @v_nbFilmLouable smallint
 
 begin
-	set @v_nbFilmLouable=(select distintcount(*) from physique where etat <= 5)+(select count(*) from numerique)+(select count(*) from louerPhys where datefin is not null)+(select count(*) from louerNum where datefin is not null)
+	set @v_nbFilmLouable=(select distinct(count(*)) from physique where etat <= 5)+(select count(*) from Numérique)+(select count(*) from louerPhys where datefin is not null)+(select distinct(count(*)) from louerNum where datefin is not null)
 	print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
 end
-
-create type Site_t from varchar(100)
-create type TitreVF_t from varchar(52)
 //////////////////////////////////////////////////////////////////////////
 drop procedure procSiteFilm
 
@@ -469,14 +432,12 @@ create Procedure procSiteFilm
 as
 declare @v_site Site_t
 begin
-    set @v_site=(select site from film where titreVF=@P_titre)
+    set @v_site=(select site from film where TitreVF=@P_titre)
     if @v_site is null
        print 'Le site du film '+@P_titre+' n est pas renseigne'
     else
        print 'Le site du film '+@P_titre+' est : ' +@v_site
 end
-=======
-exec ProcRetourLocNum '2018-12-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmLouer
 
@@ -508,9 +469,9 @@ BEGIN
 	CLOSE C_Film
 	DEALLOCATE C_Film
 END
-exec PROCfilmLouer
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCRenduLocation
+
 create or alter procedure PROCRenduLocation
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
@@ -532,9 +493,9 @@ BEGIN
 		print  'ERREUR : ce fim a deja une date de rendu'  
 	END
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCDateFinPrevu
+
 create or alter procedure PROCDateFinPrevu
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
@@ -543,10 +504,9 @@ Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 BEGIN
 	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu)
 END
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/* nombre de films en stock */
 drop procedure ProcNbFilmStock
+/* nombre de films en stock */
 create procedure ProcNbFilmStock 
 as 
 declare @v_nbFilmStock integer 
@@ -557,8 +517,8 @@ begin
 end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcNbFilmStock
 /* nombre de films loues */
-drop procedure procNbFilmLoue
 create procedure ProcNbFilmLoue
 as 
 declare @v_nbFilmLoue integer 
@@ -569,8 +529,8 @@ begin
 end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-/* nombre de films louables */
 drop procedure ProcNbFilmLouable
+/* nombre de films louables */
 create procedure ProcNbFilmLouable
 as
 declare @v_nbFilmLouable integer
@@ -579,11 +539,9 @@ begin
     print 'il y a '+str(@v_nbFilmLoue)+' film(s) louables(s)'
     return @v_nbFilmLouable
 end
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
-/*trending drm */
 drop procedure trendingDRM
-
+/*trending drm */
 create procedure trendingDRM
 AS
 Declare @v_DRM TitreVF_t
@@ -610,12 +568,9 @@ BEGIN
         CLOSE C_DRM_trend
         DEALLOCATE C_DRM_trend
 END
-
-
 /////////////////////////////////////////////////////////////////////////////
-/*avg durable par DRM*/
 drop procedure etatDRM
-
+/*avg durable par DRM*/
 create procedure etatDRM
 AS
 Declare @v_DRM DRM_t
@@ -643,4 +598,5 @@ BEGIN
         CLOSE C_etatDRM
         DEALLOCATE C_etatDRM
 END
+/////////////////////////////////////////////////////////////////////////////
 

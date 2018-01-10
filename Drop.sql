@@ -46,6 +46,7 @@ drop type telephone_t;
 drop type Langue_t;
 drop type DateLoc_t;
 drop type DRM_t;
+drop type Site_t;
 //////////////
 drop procedure PROCavantAbo
 drop procedure EstAbo
