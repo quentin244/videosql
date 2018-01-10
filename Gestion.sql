@@ -26,6 +26,8 @@ create type anciennete_t from smallint;
 create type politique_t from tinyint;
 create type Langue_t from Varchar(25)
 create type DateLoc_t from datetime
+create type DRM_t from varchar(25);
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
@@ -434,6 +436,7 @@ END
 
 //////////////////////////////////////////////////
 /* nombre de films loues */
+drop procedure ProcNbFilmLoue
 create procedure procNbFilmLoue
 as
 declare @v_nbFilmLoue smallint
@@ -453,7 +456,7 @@ declare @v_nbFilmLouable smallint
 
 begin
 	set @v_nbFilmLouable=(select distintcount(*) from physique where etat <= 5)+(select count(*) from numerique)+(select count(*) from louerPhys where datefin is not null)+(select count(*) from louerNum where datefin is not null)
-	print 'il y a '+str(@v_nbFilmLouable)+' film(s) loue(s)'
+	print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
 end
 
 create type Site_t from varchar(100)
@@ -474,6 +477,7 @@ end
 =======
 exec ProcRetourLocNum '2018-12-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCfilmLouer
 
 create or alter procedure PROCfilmLouer
 AS 
@@ -491,7 +495,8 @@ BEGIN
 	if @@FETCH_STATUS <> 0
 		print 'Aucun Film louer'
 	Else
-	BEGIN
+	BEGINcreate type DRM_t from varchar(25);
+
 		print 'Film en cours de location le ' + convert(varchar, GETDATE()) + ':'
 		while @@FETCH_STATUS = 0
 		BEGIN
@@ -504,7 +509,7 @@ BEGIN
 END
 exec PROCfilmLouer
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+drop procedure PROCRenduLocation
 create or alter procedure PROCRenduLocation
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
@@ -528,7 +533,7 @@ BEGIN
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+drop procedure PROCDateFinPrevu
 create or alter procedure PROCDateFinPrevu
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
@@ -539,7 +544,8 @@ BEGIN
 END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+/* nombre de films en stock */
+drop procedure ProcNbFilmStock
 create procedure ProcNbFilmStock 
 as 
 declare @v_nbFilmStock integer 
@@ -550,7 +556,8 @@ begin
 end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+/* nombre de films loues */
+drop procedure procNbFilmLoue
 create procedure ProcNbFilmLoue
 as 
 declare @v_nbFilmLoue integer 
@@ -561,7 +568,8 @@ begin
 end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+/* nombre de films louables */
+drop procedure ProcNbFilmLouable
 create procedure ProcNbFilmLouable
 as
 declare @v_nbFilmLouable integer
@@ -572,5 +580,66 @@ begin
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+/*trending drm */
+drop procedure trendingDRM
 
+create procedure trendingDRM
+AS
+Declare @v_DRM TitreVF_t
+Declare @v_count int
+DECLARE C_DRM_trend CURSOR FOR
+    select DRM, count(*)
+        from Version
+        group by DRM
+    order by count(*) desc
+BEGIN
+    open C_DRM_trend
+    FETCH NEXT FROM C_DRM_trend into @v_DRM, @v_count
+        if @@FETCH_STATUS <> 0
+                print 'Aucun DRM trENDing'
+        Else
+         BEGIN
+        print 'DRM trENDing: '
+        while @@FETCH_STATUS = 0
+                 BEGIN
+                print left(@v_DRM + replicate('.',52),52) +': '+ convert(varchar, @v_count)
+                FETCH NEXT FROM C_DRM_trend into @v_DRM, @v_count
+                 END
+         END
+        CLOSE C_DRM_trend
+        DEALLOCATE C_DRM_trend
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+/*avg durable par DRM*/
+drop procedure etatDRM
+
+create procedure etatDRM
+AS
+Declare @v_DRM DRM_t
+Declare @v_avg int
+DECLARE C_etatDRM CURSOR FOR
+    select DRM, avg(Etat)
+        from Version v,Physique p
+        where v.DateV=p.DateV and v.edition=p.edition
+        group by DRM
+    order by avg(Etat) desc
+BEGIN
+    open C_etatDRM
+    FETCH NEXT FROM C_etatDRM into @v_DRM, @v_avg
+        if @@FETCH_STATUS <> 0
+        print 'Aucun DRM'
+        Else
+         BEGIN
+        print 'DRM trENDing: '
+        while @@FETCH_STATUS = 0
+                 BEGIN
+                print left(@v_DRM + replicate('.',52),52) +': '+ convert(varchar, @v_avg)
+                FETCH NEXT FROM C_etatDRM into @v_DRM, @v_avg
+                 END
+         END
+        CLOSE C_etatDRM
+        DEALLOCATE C_etatDRM
+END
 

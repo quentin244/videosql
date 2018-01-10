@@ -45,6 +45,7 @@ drop type renouvellement_t;
 drop type telephone_t;
 drop type Langue_t;
 drop type DateLoc_t;
+drop type DRM_t;
 //////////////
 drop procedure PROCavantAbo
 drop procedure EstAbo
@@ -69,6 +70,8 @@ drop procedure PROCfilmreal
 drop procedure rachat
 drop procedure trending
 drop procedure durable
+drop procedure ProcDRMreminder
+drop procedure ProcDureeMaxLoc
 drop procedure PROCfilmVo
 drop procedure PROCretardNum
 drop procedure PROCretardPhys
@@ -76,4 +79,22 @@ drop procedure PROCrenouvellementNum
 drop procedure PROCrenouvellementPhys
 drop procedure PROCduree
 drop procedure ProcVraiNom
+drop procedure ProcRetourLocPhys
+drop procedure ProcRetourLocNum
+drop procedure procNbFilmEnStock
+drop procedure ProcNbFilmLoue
+drop procedure procNbFilmLouable
+drop procedure PROCfilmLouer
+drop procedure PROCRenduLocation
+drop procedure PROCDateFinPrevu
+drop procedure trendingDRM
+drop procedure procFilmPrime
+drop procedure etatDRM
+drop procedure procSiteFilm
+drop procedure procLocNum
+drop procedure ProcLocPhys
+drop procedure ProcLangueSousTitre
+drop procedure ProcLangueBandeSon
+drop procedure procFilmLouable
+drop procedure CheckAbo
 /////////////
