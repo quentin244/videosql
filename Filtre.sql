@@ -1,3 +1,4 @@
+SET DATEFORMAT ymd;  
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrealisateur
 /* prend un real et liste ses films en stock*/ 
@@ -291,66 +292,74 @@ drop procedure ProcLocPhys
 create procedure ProcLocPhys
 @P_dateDebut Dateloc_t
 as
-declare @v_numero Numero_t
+declare @v_Nom Nom_t
+declare @v_Prenom Prenom_t
 
 declare C_locPhys cursor for
-select numero
-from abonne a,louerPhys l
-where a.numero=l.numero and l.DateDebut=@P_dateDebut
-
+	select Abonné.Nom, Abonné.Prenom
+	from LouerPhys, Abonné
+	where Abonné.Nom = LouerPhys.Nom
+	And Abonné.Prenom = LouerPhys.Prenom
+	And Abonné.DateNaiss = LouerPhys.DateNaiss
+	And LouerPhys.DateDebut=@P_dateDebut
 begin
 
 open C_locPhys
-fetch next from C_locPhys into @v_numero
+fetch next from C_locPhys into @v_Nom, @v_Prenom 
 
 if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a effectue de location physique le '+@P_dateDebut
+   print 'Aucun abonne n a effectue de location physique le '+convert(varchar,@P_dateDebut)
 else
 	begin
-	print 'Liste des abonnes qui ont effectue au moins une location physique le '+@P_dateDebut
+	print 'Liste des abonnes qui ont effectue au moins une location physique le '+convert(varchar,@P_dateDebut)
 	while @@FETCH_STATUS = 0
 		begin
-		print @v_numero
-		fetch next from C_locPhys into @v_numero
+		print @v_Nom + ' ' + @v_Prenom 
+		fetch next from C_locPhys into @v_Prenom, @v_Nom
 		end
 	end
 close C_locPhys
 deallocate C_locPhys
-
 end
+exec ProcLocPhys '2017-08-12'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcLocNum
 
 create procedure ProcLocNum
 @P_dateDebut Dateloc_t
 as
-declare @v_numero Numero_t
+declare @v_Nom Nom_t
+declare @v_Prenom Prenom_t
 
 declare C_locNum cursor for
-select a.Numero
-from Abonné a, LouerPhys l
-where a.Numero=l.Numero and l.DateDebut=@P_dateDebut
+	select Abonné.Nom, Abonné.Prenom
+	from LouerNum, Abonné
+	where Abonné.Nom = LouerNum.Nom
+	And Abonné.Prenom = LouerNum.Prenom
+	And Abonné.DateNaiss = LouerNum.DateNaiss
+	And LouerNum.DateDebut=@P_dateDebut
 
 begin
 
 open C_locNum
-fetch next from C_locNum into @v_numero
+fetch next from C_locNum into  @v_Prenom, @v_Nom
 
 if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a effectue de location numerique le '+@P_dateDebut
+   print 'Aucun abonne n a effectue de location numerique le '+convert(varchar,@P_dateDebut)
 else
 	begin
-	print 'Liste des abonnes qui ont effectue au moins une location numerique le '+@P_dateDebut
+	print 'Liste des abonnes qui ont effectue au moins une location numerique le '+convert(varchar,@P_dateDebut)
 	while @@FETCH_STATUS = 0
 		begin
-		print @v_numero
-		fetch next from C_locNum into @v_numero
+		print @v_Nom + ' ' + @v_Prenom 
+		fetch next from C_locNum into  @v_Prenom, @v_Nom
 		end
 	end
 close C_locNum
 deallocate C_locNum
-
 end
+exec ProcLocNum '2017-01-01'
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /* site pour le film */
 

@@ -231,13 +231,13 @@ BEGIN
 	BEGIN
 		While @@FETCH_STATUS = 0
 		BEGIN
-			IF(Exists(select * from LouerNum where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is not null or DateFin < GETDATE()))
+			IF(Exists(select * from LouerNum where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is null or DateFin > GETDATE()))
 			Begin
    				print 'attention : location en cours pour l abonne '+@v_nom+ ' '+@v_prenom
 			End
 			ELSE
 			Begin
-				IF(Exists(select * from LouerPhys where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is not null or DateFin < GETDATE()))
+				IF(Exists(select * from LouerPhys where Nom=@v_nom and Prenom=@v_prenom and DateNaiss= @v_dateNaiss and DateFin is null or DateFin > GETDATE()))
 				Begin
    					print 'attention : location en cours pour l abonne '+@v_nom+ ' '+ @v_prenom
 				End
@@ -313,28 +313,45 @@ begin
 	else
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
 end
-exec ProcAbonneAdresse 99
+exec ProcAbonneAdresse 069
 //////////////////////////////////////////////////////////////////////////////////////////////////
 create or alter procedure PROCModifierAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
 AS
 BEGIN
+IF(Exists(select * from Abonné where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss))
+Begin
 	IF(@P_Abonnement = 'NULL')
-	Begin
-		delete from Abonné where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss
-   		delete from Personne where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss
-
-   		print 'Les modification on bien ete enregistré'
-	END
+	BEGIN
+		IF(Exists(select * from LouerNum where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null or DateFin > GETDATE()))
+		Begin
+   			print 'attention : l''abonne a des location en cours '
+		End
+		ELSE
+		Begin
+			IF(Exists(select * from LouerPhys where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null or DateFin > GETDATE()))
+			Begin
+   				print 'attention : l''abonne a des location en cours' 
+			End
+			ELSE
+			Begin
+				delete from Abonné where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss
+   				print 'L''abonnée a bien ete supprimer'
+			END
+		End
+	End
 	ELSE
 	Begin
 		update Abonné set Nom_Abonnement = @P_Abonnement, Renouvellement = GETDATE() 
-			where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss
-
-   		print 'Les modification on bien ete enregistré'
+		where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss
+   		print 'Les modification ont bien ete enregistré'
 	END
 END
-exec PROCModifierAbo 'Quentin', 'Joubert', '1997-02-04','Asticot' 
+Else
+print 'L''abonnée n''existe pas'
+End
+exec PROCModifierAbo 'Quentin', 'Joubert', '1997-02-04', 'NULL'
+exec PROCModifierAbo 'Camus','Albert','1952-01-01', 'NULL'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROClitigePhys
 /*list retard de plus de 7j*/

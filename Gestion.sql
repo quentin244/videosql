@@ -447,17 +447,15 @@ Declare @v_TitreVF TitreVF_t
 DECLARE C_Film CURSOR FOR
 	select distinct(LouerPhys.TitreVF)
 	from LouerPhys, LouerNum
-	where (LouerPhys.DateDebut < GETDATE() 
-	and LouerPhys.DateFin > GETDATE())
-	or( LouerNum.DateDebut < GETDATE()  
-	and LouerNum.DateFin > GETDATE())
+	where (LouerPhys.DateFin is NULL)
+	or(LouerNum.DateFin is NULL)
 BEGIN
 	open C_Film
 	FETCH NEXT FROM C_Film into @v_TitreVF
 	if @@FETCH_STATUS <> 0
 		print 'Aucun Film louer'
 	Else
-	BEGINcreate type DRM_t from varchar(25);
+	BEGIN
 
 		print 'Film en cours de location le ' + convert(varchar, GETDATE()) + ':'
 		while @@FETCH_STATUS = 0
@@ -469,6 +467,7 @@ BEGIN
 	CLOSE C_Film
 	DEALLOCATE C_Film
 END
+exec PROCfilmLouer
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCRenduLocation
 
