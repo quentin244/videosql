@@ -599,4 +599,42 @@ BEGIN
         DEALLOCATE C_etatDRM
 END
 /////////////////////////////////////////////////////////////////////////////
+drop procedure trendingGestionnaire
+/*print trending*/
+create procedure trendingGestionnaire
+AS
+Declare @v_TitreVF TitreVF_t
+Declare @v_countLoc int
+Declare @v_countStock int
+DECLARE C_Film_trendLoc CURSOR FOR
+    select TitreVF, count(*)
+	from LouerPhys
+	group by TitreVF
+DECLARE C_Film_trendStock CURSOR FOR
+    select TitreVF, count(*)
+	from Physique
+	group by TitreVF
+BEGIN
+    open C_Film_trendLoc
+    open C_Film_trendStock
+    FETCH NEXT FROM C_Film_trendLoc into @v_TitreVF, @v_countLoc
+    FETCH NEXT FROM C_Film_trendStock into @v_TitreVF, @v_countStock
+	if @@FETCH_STATUS <> 0
+    	print 'Aucun Film trENDing'
+	Else
+   		BEGIN
+    	print 'Film trENDing: '
+    	while @@FETCH_STATUS = 0
+   			BEGIN
+        	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_countLoc)+ replicate('.',52),52) +': '+ convert(varchar, @v_countStock)
+        	FETCH NEXT FROM C_Film_trendLOC into @v_TitreVF, @v_countLoc
+ 			FETCH NEXT FROM C_Film_trendStock into @v_TitreVF, @v_countStock
+   			END
+   		END
+	CLOSE C_Film_trendLoc
+	DEALLOCATE C_Film_trendLoc
+	CLOSE C_Film_trendStock
+	DEALLOCATE C_Film_trendStock	
+END
+
 
