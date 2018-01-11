@@ -20,7 +20,7 @@ create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
 create type adresse_t from varchar(52);
-create type telephone_t from smallint;
+create type telephone_t from Integer;
 create type renouvellement_t from datetime;
 create type anciennete_t from smallint;
 create type politique_t from tinyint;
@@ -42,31 +42,31 @@ OPEN C_check
 Fetch next from C_check into @V_num, @V_Nom, @V_Prenom, @V_Abonnement, @V_tel, @V_DateNaiss, @V_adr, @V_anciennete, @V_politique, @V_Renouvellement
 
 IF @@FETCH_STATUS <> 0
-	print 'Aucun adherent correspondant'
+	print 'Aucun abonné correspondant'
 ELSE
 	BEGIN
 	    While @@FETCH_STATUS = 0
 		BEGIN
-   		 print str(@V_num)+' '+@V_Nom+' '+@V_Prenom+' '+@V_Abonnement+' '+str(@V_tel)+' '+@V_DateNaiss+' '+@V_adr+' '+str(@V_anciennete)+' '+@V_politique+' '+@V_Renouvellement;
+   		 print str(@V_num)+' '+@V_Nom+' '+@V_Prenom+' '+@V_Abonnement+' '+str(@V_tel)+' '+ convert(varchar,@V_DateNaiss)+' '+@V_adr+' '+str(@V_anciennete)+' '+str(@V_politique)+' '+convert(varchar,@V_Renouvellement);
    		 FETCH NEXT FROM C_check into @V_num, @V_Nom, @V_Prenom, @V_Abonnement, @V_tel, @V_DateNaiss, @V_adr, @V_anciennete, @V_politique, @V_Renouvellement
 		END
 	END
+	CLOSE C_check
+DEALLOCATE C_check
 END
+exec CheckAbo 'Thebase','Whenday'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure EstAbo
 /*Prend une clef primaire d'abonne et print si elle est dans la bdd*/
 create procedure EstAbo
-@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
-@P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 Declare @v_Numero Numero_t
 Declare @true tinyint
 Declare @abonne tinyint
 
 BEGIN
-    IF (Exists (select * from Abonné where Numero=@P_num and Adresse = @P_adr and Téléphone = @P_tel and 
-    Renouvellement=@P_Renouvellement and Ancienneté=@P_Anciennete and Politique=@P_politique and 
-    Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = @P_Abonnement))
+    IF (Exists (select * from Abonné where Nom=@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss))
 	begin
 		print 'Le client '+@P_prenom+' '+@P_nom+' est abonne';
 		return 1;
@@ -77,53 +77,40 @@ BEGIN
 		return 0;
 	end
 End
+exec EstAbo 'Thebase','Whenday','1984-11-08'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCavantAbo
 /*list caract d'un abonnement*/
 create procedure PROCavantAbo
 @P_abo Abonnement_t
 AS
-DECLARE @v_prix PrixAbonnement_t
-DECLARE @v_nb NbFilms_t
-DECLARE @v_dureeLoc Duree_t
-
-DECLARE C_avantAbo CURSOR FOR
-select prix,LocationMax,DureeLoc
-from Abonnemement
-where nom=@P_abo
+DECLARE @v_prix PrixAbonnement_t = (select prix from Abonnement where nom=@P_abo)
+DECLARE @v_nb NbFilms_t = (select LocationMax from Abonnement where nom=@P_abo)
+DECLARE @v_dureeLoc Duree_t = (select DureeLoc from Abonnement where nom=@P_abo)
 
 BEGIN
-
-OPEN C_avantAbo
-FETCH NEXT FROM C_avantAbo into @v_prix,@v_nb,@v_dureeLoc
-
-IF @@FETCH_STATUS <> 0
-    print 'L abonnement '+@P_abo+' ne contient aucune caracteristique'
-ELSE
-BEGIN
-    print 'Avec l abonnement '+@P_abo+' on peut louer pour '+@v_prix+' euros '+@v_nb+' films pENDant une duree de '+@v_dureeLoc+' jours'
+    print 'Avec l abonnement '+@P_abo+' pour' + str(@v_prix)+' euros on peut louer '+ str(@v_nb)+' films pendant une duree de '+str(@v_dureeLoc)+' jours'
 END
-CLOSE C_avantAbo
-DEALLOCATE C_avantAbo
-
-END
+exec PROCavantAbo 'Asticot'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCretardNum
 /*list abonne en retard*/
 create procedure PROCretardNum
 AS
 DECLARE @v_num Numero_t
+DECLARE @v_nom Nom_t
+DECLARE @v_prenom prenom_t
+DECLARE @v_dateNaiss dateNaiss_t
 
 DECLARE C_retardNum CURSOR FOR
-select numero
-from Abonne,Abonnement,LouerNum
-where Abonnement.nom=Abonne.nom_Abonnement and LouerNum.Numero=Abonne.numero
-and Abonnement.LocationMax+LouerNum.DateDebut >=Abonnement.DureeLoc
+Select Nom, Prenom, DateNaiss
+From LouerNum
+where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
 
 BEGIN
 
 OPEN C_retardNum
-FETCH NEXT FROM C_retardNum into @v_num
+FETCH NEXT FROM C_retardNum into @v_nom, @v_prenom, @v_dateNaiss
 
 IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
@@ -132,31 +119,34 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_num
-   	 FETCH NEXT FROM C_retardNum into @v_num
+   	 print @v_nom + ' '+ @v_prenom
+   	 FETCH NEXT FROM C_retardNum into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
 CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
+exec PROCretardNum
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCretardPhys
 /*list abonne en retard*/
 create procedure PROCretardPhys
 AS
 DECLARE @v_num Numero_t
+DECLARE @v_nom Nom_t
+DECLARE @v_prenom prenom_t
+DECLARE @v_dateNaiss dateNaiss_t
 
 DECLARE C_retardPhys CURSOR FOR
-select numero
-from Abonne,Abonnement,LouerNum
-where Abonnement.nom=Abonne.nom_Abonnement and LouerPhys.Numero=Abonne.numero
-and Abonnement.LocationMax+LouerPhys.DateDebut >=Abonnement.DureeLoc
+Select Nom, Prenom, DateNaiss
+From LouerPhys
+where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
 
 BEGIN
 
 OPEN C_retardPhys
-FETCH NEXT FROM C_retardPhys into @v_num
+FETCH NEXT FROM C_retardPhys into @v_nom, @v_prenom, @v_dateNaiss
 
 IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
@@ -165,14 +155,14 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_num
-   	 FETCH NEXT FROM C_retardPhys into @v_num
+   	 print @v_nom + ' '+ @v_prenom
+   	 FETCH NEXT FROM C_retardPhys into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
-
 END
+exec PROCretardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrenouvellementAbo
 /*list doit payer*/
@@ -225,46 +215,7 @@ BEGIN
 	CLOSE C_renouvellement
 	DEALLOCATE C_renouvellement
 END
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROClitigePhys
-/*list retard de plus de 7j*/
-create procedure PROClitigePhys
-@P_numClient Numero_t
-AS
-Declare @v_nb int
-Declare @politique tinyint
-begin 
-	set @politique=0
-	set @v_nb=(select*
-	from Film,Version,Physique,LouerPhys,Abonnement,Abonne
-	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Physique.dateV=louerPhys.dateV and Physique.edition=louerPhys.edition and LouerPhys.numero=Abonne.numero
-	and Physique.id=LouerPhys.id and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
-	
-	if @v_nb >= 1
-		set @politique=@politique+1
-		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
-end
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROClitigeNum
-/*list retard de plus de 7j*/
-create procedure PROClitigeNum
-@P_numClient Numero_t
-AS
-Declare @v_nb int
-Declare @politique tinyint
-begin 
-	set @politique=0
-	set @v_nb=(select*
-	from Film,Version,Numérique,LouerNum,Abonnement,Abonné
-	where Film.titreVF=Version.titreVF and Version.dateV=Numerique.dateV and Numerique.dateV=louerNum.dateV and Numerique.edition=louerNum.edition and LouerNum.numero=Abonne.numero
-	and Abonne.nom_abonnement=Abonnement.nom and Abonne.numero=@P_numclient and (getdate()-7>datedebut + dureeloc))
-	
-	if @v_nb >= 1
-		set @politique=@politique+1
-		print 'L abonne numero '+str(@P_numClient)+' a du retard de plus d une semaine'
-end
-exec PROClitigeNum 99
+exec PROCrenouvellementAbo
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcAbonner
 /*insert dans abonne*/
@@ -294,12 +245,13 @@ exec ProcAbonner 'Quentin',
 'Joubert',
 '1997-02-04',
 'Asticot', 
-99, 
+069, 
 '37 rue louis Morard 75014 Paris', 
 069, 
 '2019-08-01', 
 1,
 1
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcAbonneAdresse
 
@@ -316,7 +268,8 @@ begin
 	else
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
 end
-
+exec ProcAbonneAdresse 99
+//////////////////////////////////////////////////////////////////////////////////////////////////
 create or alter procedure PROCModifierAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
 AS
@@ -336,4 +289,73 @@ BEGIN
    		print 'Les modification on bien ete enregistré'
 	END
 END
+exec PROCModifierAbo 'Quentin', 'Joubert', '1997-02-04','Asticot' 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROClitigePhys
+/*list retard de plus de 7j*/
+create procedure PROClitigePhys
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
+AS
+Declare @v_TitreVF TitreVF_t
+DECLARE C_LitigePhys CURSOR FOR 
+Select TitreVF
+From LouerPhys
+where Nom = @P_Prenom
+And Prenom = @P_Nom
+And DateNaiss = @P_DateNaiss
+And DateFin >=((DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)) +7)
+begin 
+OPEN C_LitigePhys
+	FETCH NEXT FROM C_LitigePhys into @v_TitreVF
+	IF @@FETCH_STATUS <> 0
+	Begin
+		print 'Aucun litige de plus d''une semaine'
+	End
+	ELSE
+	BEGIN
+	print 'L abonne numero '+@P_Prenom + @P_Nom+' a du retard de plus d une semaine sur :'
+		While @@FETCH_STATUS = 0
+		BEGIN
+		print @v_TitreVF
+		FETCH NEXT FROM C_LitigePhys into @v_TitreVF
+		End
+	END
+	CLOSE C_LitigePhys
+	DEALLOCATE C_LitigePhys
+end
+exec PROClitigePhys 'Albert','Camus','1952-01-01'
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROClitigeNum
+/*list retard de plus de 7j*/
+create procedure PROClitigeNum
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
+AS
+Declare @v_TitreVF TitreVF_t
+DECLARE C_LitigeNum CURSOR FOR 
+Select TitreVF
+From LouerNum
+where Nom = @P_Prenom
+And Prenom = @P_Nom
+And DateNaiss = @P_DateNaiss
+And DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))+7
+begin 
+OPEN C_LitigeNum
+	FETCH NEXT FROM C_LitigeNum into @v_TitreVF
+	IF @@FETCH_STATUS <> 0
+	Begin
+		print 'Aucun litige de plus d''une semaine'
+	End
+	ELSE
+	BEGIN
+	print 'L abonne numero '+@P_Prenom + @P_Nom+' a du retard de plus d une semaine sur :'
+		While @@FETCH_STATUS = 0
+		BEGIN
+		print @v_TitreVF
+		FETCH NEXT FROM C_LitigeNum into @v_TitreVF
+		End
+	END
+	CLOSE C_LitigeNum
+	DEALLOCATE C_LitigeNum
+end
+exec PROClitigeNum 'Allo','Mais','1929-21-06'
 //////////////////////////////////////////////////////////////////////////////////////////////////
