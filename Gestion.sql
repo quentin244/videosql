@@ -424,20 +424,7 @@ begin
 	set @v_nbFilmLouable=(select distinct(count(*)) from physique where etat <= 5)+(select count(*) from Numérique)+(select count(*) from louerPhys where datefin is not null)+(select distinct(count(*)) from louerNum where datefin is not null)
 	print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
 end
-//////////////////////////////////////////////////////////////////////////
-drop procedure procSiteFilm
 
-create Procedure procSiteFilm
-@P_titre TitreVF_t
-as
-declare @v_site Site_t
-begin
-    set @v_site=(select site from film where TitreVF=@P_titre)
-    if @v_site is null
-       print 'Le site du film '+@P_titre+' n est pas renseigne'
-    else
-       print 'Le site du film '+@P_titre+' est : ' +@v_site
-end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmLouer
 
@@ -635,5 +622,80 @@ BEGIN
 	CLOSE C_Film_trendStock
 	DEALLOCATE C_Film_trendStock	
 END
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLocPhys
+
+create procedure ProcLocPhys
+@P_dateDebut Dateloc_t
+as
+declare @v_Nom Nom_t
+declare @v_Prenom Prenom_t
+
+declare C_locPhys cursor for
+	select Abonné.Nom, Abonné.Prenom
+	from LouerPhys, Abonné
+	where Abonné.Nom = LouerPhys.Nom
+	And Abonné.Prenom = LouerPhys.Prenom
+	And Abonné.DateNaiss = LouerPhys.DateNaiss
+	And LouerPhys.DateDebut=@P_dateDebut
+begin
+
+open C_locPhys
+fetch next from C_locPhys into @v_Nom, @v_Prenom 
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a effectue de location physique le '+convert(varchar,@P_dateDebut)
+else
+	begin
+	print 'Liste des abonnes qui ont effectue au moins une location physique le '+convert(varchar,@P_dateDebut)
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_Nom + ' ' + @v_Prenom 
+		fetch next from C_locPhys into @v_Prenom, @v_Nom
+		end
+	end
+close C_locPhys
+deallocate C_locPhys
+end
+exec ProcLocPhys '2017-08-12'
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcLocNum
+
+create procedure ProcLocNum
+@P_dateDebut Dateloc_t
+as
+declare @v_Nom Nom_t
+declare @v_Prenom Prenom_t
+
+declare C_locNum cursor for
+	select Abonné.Nom, Abonné.Prenom
+	from LouerNum, Abonné
+	where Abonné.Nom = LouerNum.Nom
+	And Abonné.Prenom = LouerNum.Prenom
+	And Abonné.DateNaiss = LouerNum.DateNaiss
+	And LouerNum.DateDebut=@P_dateDebut
+
+begin
+
+open C_locNum
+fetch next from C_locNum into  @v_Prenom, @v_Nom
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a effectue de location numerique le '+convert(varchar,@P_dateDebut)
+else
+	begin
+	print 'Liste des abonnes qui ont effectue au moins une location numerique le '+convert(varchar,@P_dateDebut)
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_Nom + ' ' + @v_Prenom 
+		fetch next from C_locNum into  @v_Prenom, @v_Nom
+		end
+	end
+close C_locNum
+deallocate C_locNum
+end
+exec ProcLocNum '2017-01-01'
+
 
 

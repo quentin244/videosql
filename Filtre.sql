@@ -10,6 +10,7 @@ BEGIN
     Set @v_nomR = (select nom from participer where @P_film=titreVF And Role = 'Realisateur');
     print @P_film +' est realise par '+@v_nomR
 END
+exec PROCrealisateur 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmAct
 /* prend un act et liste ses films en stock*/ 
@@ -42,6 +43,7 @@ END
 CLOSE C_filmAct
 DEALLOCATE C_filmAct
 END
+exec PROCfilmAct 'DiCaprio', 'Leonardo'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCdistinctionFilm
 /* Prend un film est liste ses distinctions*/
@@ -74,6 +76,7 @@ END
 CLOSE C_filmDist
 DEALLOCATE C_filmDist
 END
+exec PROCdistinctionFilm 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AfficheEdition
 /*Prend un film et print les editions en stock*/
@@ -94,6 +97,7 @@ BEGIN
 	 END
     ELSE
     BEGIN
+		print 'Le film ' + @P_TitreVF + ' est disponible dans les version suivantes: '
    		While @@FETCH_STATUS = 0
 		BEGIN
    			Print @v_Edition
@@ -103,6 +107,7 @@ BEGIN
 	CLOSE ListEdition
 	DEALLOCATE ListEdition
 END
+exec AfficheEdition 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmreal
 /*prend prenom,nom d'un real et print ses films*/
@@ -136,6 +141,7 @@ BEGIN
 	CLOSE C_filmDeReal
 	DEALLOCATE C_filmDeReal
 END
+exec PROCfilmreal 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure trending
 /*print trending*/
@@ -159,13 +165,14 @@ BEGIN
     	print 'Film trENDing: '
     	while @@FETCH_STATUS = 0
    		 BEGIN
-        	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_count)
+        	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_count) +' location'
         	FETCH NEXT FROM C_Film_trend into @v_TitreVF, @v_count
    		 END
    	 END
 	CLOSE C_Film_trend
 	DEALLOCATE C_Film_trend
 END
+exec trending
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmVo
 /*print titre VO*/
@@ -177,6 +184,7 @@ BEGIN
     SET @P_titreVO=(select titreVO from Film where TitreVF=@P_filmVF);
     print @P_filmVF+' a pour titre en original '+@P_titreVO
 END
+exec PROCfilmVo 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCduree
 /*liste les films d'un real de plus de 2h*/
@@ -186,9 +194,14 @@ as
 DECLARE @v_film Film_t
 
 DECLARE C_duree CURSOR FOR
-select Film.titreVF
-from Film,Version,Participer
-where Film.titreVF=Participer.titreVF and Film.titreVF=Version.titreVF and nom=@P_nomR and prenom=@P_prenomR and duree> '02:00:00' and role='Realisateur'
+	select distinct (Film.titreVF)
+	from Film,Version,Participer
+	where Film.titreVF=Version.titreVF 
+	and Version.titreVF=Participer.titreVF 
+	and nom=@P_nomR 
+	and prenom=@P_prenomR 
+	and duree> '02:00:00' 
+	and role='Realisateur'
 
 BEGIN
 
@@ -196,10 +209,10 @@ OPEN C_duree
 FETCH NEXT FROM C_duree into @v_film
 
 IF @@FETCH_STATUS <> 0
-    print 'Aucun film n est realise par '+@P_prenomR+' '+@P_nomR
+    print 'Aucun film de plus de 2h n est realise par '+@P_prenomR+' '+@P_nomR
 ELSE
 BEGIN
-    print 'Liste des films realises par '+@P_prenomR+' '+@P_nomR
+    print 'Liste des films de plus de 2h realises par '+@P_prenomR+' '+@P_nomR
     While @@FETCH_STATUS = 0
     BEGIN
    	 print @v_film
@@ -210,6 +223,7 @@ CLOSE C_duree
 DEALLOCATE C_duree
 
 END
+exec PROCduree 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcVraiNom
 /*redit*/
@@ -221,6 +235,7 @@ BEGIN
     set @v_titreVO=(select titreVO from Film where @P_filmVF=titreVF)
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
+ProcVraiNom 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcLangueBandeSon
 
@@ -230,19 +245,19 @@ as
 declare @v_langue Langue_t
 
 declare C_langueBS cursor for
-select l.langue
-from langue l,vocaliser v
-where l.langue=v.langue and v.titreVF=@P_titre
+select distinct(Langue)
+from Vocaliser v
+where titreVF=@P_titre
 
 begin
 
 open C_langueBS
-fetch next from C_langueBS into @P_titre
+fetch next from C_langueBS into @v_langue
 
 if @@FETCH_STATUS <> 0
    print 'Aucune langue disponible pour la bande son du film '+@P_titre
 else
-   print 'Liste des langues disponibles pour le film '+@P_titre
+   print 'Liste des langues disponibles pour la bande son du film  '+@P_titre + ':'
    while @@FETCH_STATUS = 0
    begin
     print @v_langue
@@ -252,6 +267,7 @@ close C_langueBS
 deallocate C_langueBS
 
 end
+exec ProcLangueBandeSon 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcLangueSousTitre
 
@@ -261,14 +277,14 @@ as
 declare @v_langue Langue_t
 
 declare C_langueST cursor for
-select l.langue
+select distinct (l.langue)
 from langue l,sous_titrer s
 where l.langue=s.langue and s.titreVF=@P_titre
 
 begin
 
 open C_langueST
-fetch next from C_langueBS into @P_titre
+fetch next from C_langueST into @v_langue
 
 if @@FETCH_STATUS <> 0
    print 'Aucune langue disponible pour la bande son du film '+@P_titre
@@ -285,81 +301,7 @@ close C_langueST
 deallocate C_langueST
 
 end
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcLocPhys
-
-create procedure ProcLocPhys
-@P_dateDebut Dateloc_t
-as
-declare @v_Nom Nom_t
-declare @v_Prenom Prenom_t
-
-declare C_locPhys cursor for
-	select Abonné.Nom, Abonné.Prenom
-	from LouerPhys, Abonné
-	where Abonné.Nom = LouerPhys.Nom
-	And Abonné.Prenom = LouerPhys.Prenom
-	And Abonné.DateNaiss = LouerPhys.DateNaiss
-	And LouerPhys.DateDebut=@P_dateDebut
-begin
-
-open C_locPhys
-fetch next from C_locPhys into @v_Nom, @v_Prenom 
-
-if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a effectue de location physique le '+convert(varchar,@P_dateDebut)
-else
-	begin
-	print 'Liste des abonnes qui ont effectue au moins une location physique le '+convert(varchar,@P_dateDebut)
-	while @@FETCH_STATUS = 0
-		begin
-		print @v_Nom + ' ' + @v_Prenom 
-		fetch next from C_locPhys into @v_Prenom, @v_Nom
-		end
-	end
-close C_locPhys
-deallocate C_locPhys
-end
-exec ProcLocPhys '2017-08-12'
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcLocNum
-
-create procedure ProcLocNum
-@P_dateDebut Dateloc_t
-as
-declare @v_Nom Nom_t
-declare @v_Prenom Prenom_t
-
-declare C_locNum cursor for
-	select Abonné.Nom, Abonné.Prenom
-	from LouerNum, Abonné
-	where Abonné.Nom = LouerNum.Nom
-	And Abonné.Prenom = LouerNum.Prenom
-	And Abonné.DateNaiss = LouerNum.DateNaiss
-	And LouerNum.DateDebut=@P_dateDebut
-
-begin
-
-open C_locNum
-fetch next from C_locNum into  @v_Prenom, @v_Nom
-
-if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a effectue de location numerique le '+convert(varchar,@P_dateDebut)
-else
-	begin
-	print 'Liste des abonnes qui ont effectue au moins une location numerique le '+convert(varchar,@P_dateDebut)
-	while @@FETCH_STATUS = 0
-		begin
-		print @v_Nom + ' ' + @v_Prenom 
-		fetch next from C_locNum into  @v_Prenom, @v_Nom
-		end
-	end
-close C_locNum
-deallocate C_locNum
-end
-exec ProcLocNum '2017-01-01'
-
+exec ProcLangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /* site pour le film */
 
@@ -374,12 +316,22 @@ begin
     else
        print 'Le site du film '+@P_titre+' est : ' +@v_site
 end
+exec procSiteFilm 'Brice de Nice'
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /* insertion d'un film primé */
+drop procedure procFilmPrime 
 
 create procedure procFilmPrime
-@P_DateD DateDist_t,@P_TitreVF TitreVF_t,@P_NomDist	nomDistinction_t,@P_Categorie CategorieDist_t,@P_Lieu lieuDistinction_t
+@P_DateD Date,@P_TitreVF TitreVF_t,@P_NomDist nomDistinction_t,@P_Categorie varchar(25),@P_Lieu varchar(25)
 as
 begin
-insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
-end	
+if (exists(select * from Distinction where Nom = @P_NomDist and Categorie = @P_Categorie and Lieu = @P_Lieu))
+Begin
+	insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
+end
+else
+Begin
+	insert into Distinction values(@P_NomDist,@P_Categorie,@P_Lieu)
+	insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
+End
+end
