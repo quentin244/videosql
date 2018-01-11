@@ -1,3 +1,4 @@
+SET DATEFORMAT ymd;  
 Insert into Film
 values ('Demandez la Permission aux Enfants','Demandez la Permission aux Enfants',NULL,'Réalisation : Éric Civanyan, Scénario et dialogues : Guillaume Breton et Éric Civanyan, d''après une idée originale de Guillaume Breton , Directeur de production : Gilles Loutfi, Producteur délégué : Manuel Munz, Chef décorateur : Jean-luc Raoul, Directeur de la photographie : Stéphane Cami, Mixage : François Groult, Directeur de la photographie : Stéphane Cami, Chef costumière : Anne Brault, Chef décorateur : Jean-luc Raoul, Chef monteur : Aurique Delannoy, Effets spéciaux (balançoire) : François Philippi, Luis Gutierrez-pino, Autres effets spéciaux numériques : L’Étude et la Supervision des Trucages (François Vagnon), Dessins/Illustrateur BD : François Duprat, Photographe de plateau : Arnaud Borrel, Musique originale : François Peyrony, Coordination : Laurent Juillet','Trois familles sont confrontées à un seul et même problème : leurs enfants leur mènent la vie dure. Et puis un jour, la bêtise de trop et voilà que les adultes décident d''unir leurs forces pour rendre à ces petits diables la monnaie de leur désobéissance. Entre les enfants rois et les parents rebelles, désormais, tous les coups sont permis.','Français');
 insert into Film
@@ -637,9 +638,9 @@ values ('2017-01-01',NULL,'Avatar','2002-06-19','Base','Christ','Jesus','1984-08
 insert into LouerNum
 values ('2017-01-01',NULL,'Avatar','1978-01-12','Base','Weshwesh','lesamis','1995-04-26', 0);
 insert into LouerNum
-values ('2017-01-01',NULL,'Demandez la Permission aux Enfants','1986-02-21','Base','Christ','Jesus','1984-08-22', 0);
+values ('2010-01-01',NULL,'Demandez la Permission aux Enfants','1986-02-21','Base','Christ','Jesus','1984-08-22', 0);
 insert into LouerNum
-values ('2017-01-01',NULL,'Titanic','1955-06-11','Base','Christ','Jesus','1984-08-22', 0);
+values ('2015-01-01',NULL,'Titanic','1955-06-11','Base','Christ','Jesus','1984-08-22', 0);
 insert into LouerNum
 values ('2017-01-01',NULL,'Avatar','1928-07-22','Java','Jenova','Sephiroth','1963-10-23', 0);
 insert into LouerNum

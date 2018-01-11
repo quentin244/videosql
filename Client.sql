@@ -77,7 +77,8 @@ DECLARE @v_dateNaiss dateNaiss_t
 DECLARE C_retardNum CURSOR FOR
 Select Nom, Prenom, DateNaiss
 From LouerNum
-where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+where(DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+OR (getdate() >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))))
 
 BEGIN
 
@@ -113,7 +114,8 @@ DECLARE @v_dateNaiss dateNaiss_t
 DECLARE C_retardPhys CURSOR FOR
 Select Nom, Prenom, DateNaiss
 From LouerPhys
-where DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+where (DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+OR (getdate() >=(Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)))
 
 BEGIN
 
@@ -135,6 +137,77 @@ CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
 exec PROCretardPhys
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCretardNumPers
+create procedure PROCretardNumPers
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
+AS
+DECLARE @v_TitreVf TitreVF_t
+
+DECLARE C_retardNum CURSOR FOR
+Select TitreVF
+From LouerNum
+where Nom = @P_Prenom
+And Prenom = @P_Nom
+And DateNaiss = @P_DateNaiss
+And(DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+OR (getdate() >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))))
+
+BEGIN
+
+OPEN C_retardNum
+FETCH NEXT FROM C_retardNum into @v_TitreVf
+
+IF @@FETCH_STATUS <> 0
+    print 'Aucun abonne n a de retard'
+ELSE
+BEGIN
+    print 'Les retard de ''abonne' + @P_Prenom + ' '+ @P_Nom
+    While @@FETCH_STATUS = 0
+    BEGIN
+   	 print @v_TitreVf
+   	 FETCH NEXT FROM C_retardNum into @v_TitreVf
+    END
+END
+CLOSE C_retardNum
+DEALLOCATE C_retardNum
+
+END
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure PROCretardPhysPers
+create procedure PROCretardPhysPers
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
+AS
+DECLARE @v_TitreVf TitreVF_t
+
+DECLARE C_retardPhys CURSOR FOR
+Select TitreVF
+From LouerPhys
+where Nom = @P_Prenom
+And Prenom = @P_Nom
+And DateNaiss = @P_DateNaiss
+And (DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+OR (getdate() >=(DateDebut + (DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)))))
+
+BEGIN
+
+OPEN C_retardPhys
+FETCH NEXT FROM C_retardPhys into @v_TitreVf
+
+IF @@FETCH_STATUS <> 0
+    print 'Aucun abonne n a de retard'
+ELSE
+BEGIN
+    print 'Les retard de ''abonne' + @P_Prenom + ' '+ @P_Nom
+    While @@FETCH_STATUS = 0
+    BEGIN
+   	 print @v_TitreVf
+   	 FETCH NEXT FROM C_retardPhys into @v_TitreVf
+    END
+END
+CLOSE C_retardPhys
+DEALLOCATE C_retardPhys
+END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCrenouvellementAbo
 /*list doit payer*/
