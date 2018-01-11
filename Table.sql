@@ -209,3 +209,4 @@ create type Langue_t from Varchar(25)
 create type DateLoc_t from datetime
 create type DRM_t from varchar(25);
 create type Site_t from varchar(100)
+create type Caracteristique_t from text
