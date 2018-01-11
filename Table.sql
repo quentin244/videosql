@@ -201,7 +201,7 @@ create type support_t from varchar(25);
 create type id_t from smallint;
 create type Etat_t from tinyint;
 create type adresse_t from varchar(52);
-create type telephone_t from smallint;
+create type telephone_t from integer;
 create type renouvellement_t from datetime;
 create type anciennete_t from smallint;
 create type politique_t from tinyint;
