@@ -1,3 +1,6 @@
+SET DATEFORMAT ymd;  
+Insert into LouerPhys values ('2018-01-01',NULL, 11566, 'Avatar','1928-07-22','Java','Joubert', 'Quentin', '1997-04-02', 0)
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
@@ -261,6 +264,7 @@ IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_T
    	 delete from Film Where  TitreVF =@v_TitreVF
     END
 END
+exec rachat 444
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure durable
 /*avg durable par film*/
@@ -281,7 +285,7 @@ BEGIN
     	print 'Aucun Film'
 	Else
    	 BEGIN
-    	print 'Film trENDing: '
+    	print 'Moyenne d''usure par film: '
     	while @@FETCH_STATUS = 0
    		 BEGIN
         	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_avg)
@@ -291,6 +295,7 @@ BEGIN
 	CLOSE C_durable
 	DEALLOCATE C_durable
 END
+exec durable
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcDRMreminder
 /*trigger print DRM*/
@@ -320,74 +325,7 @@ begin
 	else
 	   print 'La duree maximale de l abonnement '+@P_nomAbo+' est de '+str(@v_dureeMax)+' jours'
 end
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcRetourLocPhys
-
-create procedure ProcRetourLocPhys
-@P_dateFin DateV_t
-as
-declare @v_numero Numero_t
-
-declare @v_nom Nom_t
-declare @v_prenom Prenom_t
-declare @v_dateNaiss dateNaiss_t
-
-declare C_retourLocPhys cursor for
-select distinct (Nom), Prenom, DateNaiss
-from LouerPhys
-where DateFin=@P_dateFin
-
-begin
-open C_retourLocPhys
-fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
-
-if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a une location physique a rendre le '+convert(varchar, @P_dateFin)
-else
-	begin
-	print 'Liste des abonnes qui doivent rentre leur(s) location(s) physique(s) le '+ convert(varchar, @P_dateFin)
-	while @@FETCH_STATUS = 0
-		begin
-		print @v_prenom+' ' +@v_nom 
-		fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
-		end
-	end
-close C_retourLocPhys
-deallocate C_retourLocPhys
-end
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcRetourLocNum
-
-create procedure ProcRetourLocNum
-@P_dateFin DateV_t
-as
-declare @v_numero Numero_t
-declare @v_nom Nom_t
-declare @v_prenom Prenom_t
-declare @v_dateNaiss dateNaiss_t
-declare C_retourLocNum cursor for
-select distinct (Nom), Prenom, DateNaiss
-from LouerNum
-where DateFin=@P_dateFin
-
-begin
-open C_retourLocNum
-fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
-
-if @@FETCH_STATUS <> 0
-   print 'Aucun abonne n a une location numerique a rendre le '+convert(varchar, @P_dateFin)
-else
-	begin
-	print 'Liste des abonnes qui doivent rentre leur(s) location(s) numerique(s) le '+ convert(varchar, @P_dateFin)
-	while @@FETCH_STATUS = 0
-		begin
-		print @v_prenom+' ' +@v_nom 
-		fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
-		end
-	end
-close C_retourLocNum
-deallocate C_retourLocNum
-end
+exec ProcDureeMaxLoc 'Asticot'
 ///////////////////////////////////////////////
 drop procedure procNbFilmEnStock
 /*nombre de films en stock */
@@ -399,7 +337,7 @@ BEGIN
 	Print 'il y a '+str(@v_nbFilmStock)+' films en stock'
 	Return @v_nbFilmStock
 END
-
+exec procNbFilmEnStock
 //////////////////////////////////////////////////
 /* nombre de films loues */
 drop procedure ProcNbFilmLoue
@@ -412,7 +350,7 @@ begin
 	print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
 	return @v_nbFilmLoue
 end
-
+exec procNbFilmLoue
 //////////////////////////////////////////////
 drop procedure procNbFilmLouable
 
@@ -424,7 +362,7 @@ begin
 	set @v_nbFilmLouable=(select distinct(count(*)) from physique where etat <= 5)+(select count(*) from Numérique)+(select count(*) from louerPhys where datefin is not null)+(select distinct(count(*)) from louerNum where datefin is not null)
 	print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
 end
-
+exec procNbFilmLouable
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmLouer
 
@@ -455,6 +393,7 @@ BEGIN
 	DEALLOCATE C_Film
 END
 exec PROCfilmLouer
+select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCRenduLocation
 
@@ -464,11 +403,12 @@ AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 Declare @v_Date DateV_t = (select GETDATE())
-Declare @v_DateRendu DateV_t = (select DateFin from LouerPhys
-		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
-		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+Declare @v_DateRendu DateV_t
 BEGIN
-	if (@v_DateRendu = NULL)
+if (exists(select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
+Begin
+Set @v_DateRendu = (select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+if (@v_DateRendu is NULL)
 	BEGIN
 		update LouerPhys set DateFin = @v_Date 
 		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
@@ -478,7 +418,29 @@ BEGIN
 	BEGIN
 		print  'ERREUR : ce fim a deja une date de rendu'  
 	END
+End
+Else if (exists(select DateFin from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
+Begin
+Set @v_DateRendu = (select DateFin from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+if (@v_DateRendu is NULL)
+	BEGIN
+		update LouerNum set DateFin = @v_Date 
+		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
+		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
+	END
+	ELSE
+	BEGIN
+		print  'ERREUR : ce fim a deja une date de rendu'  
+	END
+End
+Else
+begin 
+print 'La location n''existe pas'
+end
 END
+SET DATEFORMAT ymd;  
+exec PROCRenduLocation 'Joubert','Quentin','1997-04-02', 'Avatar','2018-01-01'
+select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCDateFinPrevu
 
@@ -488,8 +450,10 @@ AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 BEGIN
-	print 'Film doit etre rendu le ' + convert(varchar, @v_DateFinPrevu)
+	print @P_TitreVF + ' doit etre rendu le ' + convert(varchar, @v_DateFinPrevu)
 END
+
+exec PROCDateFinPrevu 'Weshwesh','lesamis','1995-26-04', 'Protéger et Servir','2017-01-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcNbFilmStock
 /* nombre de films en stock */
@@ -501,9 +465,9 @@ begin
     print 'il y a '+str(@v_nbFilmStock)+' film(s) en stock'
     return @v_nbFilmStock
 end
-
+exec ProcNbFilmStock
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcNbFilmStock
+drop procedure ProcNbFilmLoue
 /* nombre de films loues */
 create procedure ProcNbFilmLoue
 as 
@@ -513,7 +477,7 @@ begin
     print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
     return @v_nbFilmLoue
 end
-
+exec ProcNbFilmLoue
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcNbFilmLouable
 /* nombre de films louables */
@@ -522,9 +486,10 @@ as
 declare @v_nbFilmLouable integer
 begin
     set @v_nbFilmLouable=((select distinct(count(*)) from numérique )+(select distinct(count(*)) from physique where etat <= 5))-((select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum where dateFin is null))
-    print 'il y a '+str(@v_nbFilmLoue)+' film(s) louables(s)'
+    print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
     return @v_nbFilmLouable
 end
+exec ProcNbFilmLouable
 ////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure trendingDRM
 /*trending drm */
@@ -544,7 +509,7 @@ BEGIN
                 print 'Aucun DRM trENDing'
         Else
          BEGIN
-        print 'DRM trENDing: '
+        print 'Location par DRM: '
         while @@FETCH_STATUS = 0
                  BEGIN
                 print left(@v_DRM + replicate('.',52),52) +': '+ convert(varchar, @v_count)
@@ -554,6 +519,7 @@ BEGIN
         CLOSE C_DRM_trend
         DEALLOCATE C_DRM_trend
 END
+exec trendingDRM
 /////////////////////////////////////////////////////////////////////////////
 drop procedure etatDRM
 /*avg durable par DRM*/
@@ -574,7 +540,7 @@ BEGIN
         print 'Aucun DRM'
         Else
          BEGIN
-        print 'DRM trENDing: '
+        print 'Moyenne d''etat par DRM: '
         while @@FETCH_STATUS = 0
                  BEGIN
                 print left(@v_DRM + replicate('.',52),52) +': '+ convert(varchar, @v_avg)
@@ -584,6 +550,7 @@ BEGIN
         CLOSE C_etatDRM
         DEALLOCATE C_etatDRM
 END
+exec etatDRM
 /////////////////////////////////////////////////////////////////////////////
 drop procedure trendingGestionnaire
 /*print trending*/
@@ -612,7 +579,7 @@ BEGIN
     	print 'Film trENDing: '
     	while @@FETCH_STATUS = 0
    			BEGIN
-        	print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_countLoc)+ replicate('.',52),52) +': '+ convert(varchar, @v_countStock)
+			print left(@v_TitreVF + replicate('.',52),52) +': '+ convert(varchar, @v_countLoc) + ' loué'+ ': '+ convert(varchar, @v_countStock) + ' en stock'
         	FETCH NEXT FROM C_Film_trendLOC into @v_TitreVF, @v_countLoc
  			FETCH NEXT FROM C_Film_trendStock into @v_TitreVF, @v_countStock
    			END
@@ -622,7 +589,7 @@ BEGIN
 	CLOSE C_Film_trendStock
 	DEALLOCATE C_Film_trendStock	
 END
-
+exec trendingGestionnaire
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ProcLocPhys
 
@@ -696,6 +663,73 @@ close C_locNum
 deallocate C_locNum
 end
 exec ProcLocNum '2017-01-01'
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcRetourLocPhys
 
+create procedure ProcRetourLocPhys
+@P_dateFin DateV_t
+as
+declare @v_numero Numero_t
 
+declare @v_nom Nom_t
+declare @v_prenom Prenom_t
+declare @v_dateNaiss dateNaiss_t
 
+declare C_retourLocPhys cursor for
+select distinct (Nom), Prenom, DateNaiss
+from LouerPhys
+where DateFin=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
+
+begin
+open C_retourLocPhys
+fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a une location physique a rendre le '+convert(varchar, @P_dateFin)
+else
+	begin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) physique(s) le '+ convert(varchar, @P_dateFin)
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_prenom+' ' +@v_nom 
+		fetch next from C_retourLocPhys into @v_nom, @v_prenom, @v_dateNaiss
+		end
+	end
+close C_retourLocPhys
+deallocate C_retourLocPhys
+end
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure ProcRetourLocNum
+
+create procedure ProcRetourLocNum
+@P_dateFin DateV_t
+as
+declare @v_numero Numero_t
+declare @v_nom Nom_t
+declare @v_prenom Prenom_t
+declare @v_dateNaiss dateNaiss_t
+declare C_retourLocNum cursor for
+select distinct (Nom), Prenom, DateNaiss
+from LouerNum
+where DateFin=@P_dateFin
+
+begin
+open C_retourLocNum
+fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
+
+if @@FETCH_STATUS <> 0
+   print 'Aucun abonne n a une location numerique a rendre le '+convert(varchar, @P_dateFin)
+else
+	begin
+	print 'Liste des abonnes qui doivent rentre leur(s) location(s) numerique(s) le '+ convert(varchar, @P_dateFin)
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_prenom+' ' +@v_nom 
+		fetch next from C_retourLocNum into @v_nom, @v_prenom, @v_dateNaiss
+		end
+	end
+close C_retourLocNum
+deallocate C_retourLocNum
+end
+
+exec VerifStockPhys ''

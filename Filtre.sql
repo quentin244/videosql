@@ -107,7 +107,8 @@ BEGIN
 	CLOSE ListEdition
 	DEALLOCATE ListEdition
 END
-exec AfficheEdition 'Titanic'
+exec AfficheEdition 'Avatar'
+exec VerifStockPhys 11566,'Avatar','BlueRay','1928-07-22','Java'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PROCfilmreal
 /*prend prenom,nom d'un real et print ses films*/
