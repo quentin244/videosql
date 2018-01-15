@@ -51,9 +51,9 @@ BEGIN
 End
 exec EstAbo 'Thebase','Whenday','1984-11-08'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCavantAbo
+drop procedure AvantAbo
 /*list caract d'un abonnement*/
-create procedure PROCavantAbo
+create procedure AvantAbo
 @P_abo Abonnement_t
 AS
 DECLARE @v_prix PrixAbonnement_t = (select prix from Abonnement where nom=@P_abo)
@@ -63,11 +63,42 @@ DECLARE @v_dureeLoc Duree_t = (select DureeLoc from Abonnement where nom=@P_abo)
 BEGIN
     print 'Avec l abonnement '+@P_abo+' pour' + str(@v_prix)+' euros on peut louer '+ str(@v_nb)+' films pendant une duree de '+str(@v_dureeLoc)+' jours'
 END
-exec PROCavantAbo 'Asticot'
+exec AvantAbo 'Asticot'
+
+create procedure AvantAboTout
+AS
+Declare @v_nom Abonnement_t
+DECLARE @v_prix PrixAbonnement_t
+DECLARE @v_nb NbFilms_t
+DECLARE @v_dureeLoc Duree_t
+
+DECLARE C_Abo CURSOR FOR
+Select Nom, prix, LocationMax, DureeLoc
+From Abonnement
+BEGIN
+
+OPEN C_Abo
+FETCH NEXT FROM C_Abo into @v_nom, @v_prix, @v_nb, @v_dureeLoc
+IF @@FETCH_STATUS <> 0
+    print 'Aucun abonne n a de retard'
+ELSE
+BEGIN
+    print 'Liste des abonnes avec un retard en cours'
+    While @@FETCH_STATUS = 0
+    BEGIN
+   	 print 'Avec l abonnement '+@v_nom+' pour' + str(@v_prix)+' euros on peut louer '+ str(@v_nb)+' films pendant une duree de '+str(@v_dureeLoc)+' jours'
+   	 FETCH NEXT FROM C_Abo into @v_nom, @v_prix, @v_nb, @v_dureeLoc
+    END
+END
+CLOSE C_Abo
+DEALLOCATE C_Abo
+END
+
+exec AvantAboTout
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCretardNum
+drop procedure RetardNum
 /*list abonne en retard*/
-create procedure PROCretardNum
+create procedure RetardNum
 AS
 DECLARE @v_num Numero_t
 DECLARE @v_nom Nom_t
@@ -100,11 +131,11 @@ CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
-exec PROCretardNum
+exec RetardNum
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCretardPhys
+drop procedure RetardPhys
 /*list abonne en retard*/
-create procedure PROCretardPhys
+create procedure RetardPhys
 AS
 DECLARE @v_num Numero_t
 DECLARE @v_nom Nom_t
@@ -136,10 +167,10 @@ END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
-exec PROCretardPhys
+exec RetardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCretardNumPers
-create procedure PROCretardNumPers
+drop procedure RetardNumPers
+create procedure RetardNumPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 DECLARE @v_TitreVf TitreVF_t
@@ -174,8 +205,8 @@ DEALLOCATE C_retardNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCretardPhysPers
-create procedure PROCretardPhysPers
+drop procedure RetardPhysPers
+create procedure RetardPhysPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 DECLARE @v_TitreVf TitreVF_t
@@ -209,9 +240,9 @@ CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrenouvellementAbo
+drop procedure RenouvellementAbo
 /*list doit payer*/
-create or alter procedure PROCrenouvellementAbo
+create or alter procedure RenouvellementAbo
 AS
 DECLARE @v_nom Nom_t
 DECLARE @v_prenom prenom_t
@@ -260,11 +291,11 @@ BEGIN
 	CLOSE C_renouvellement
 	DEALLOCATE C_renouvellement
 END
-exec PROCrenouvellementAbo
+exec RenouvellementAbo
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcAbonner
+drop procedure Abonner
 /*insert dans abonne*/
-create procedure ProcAbonner
+create procedure Abonner
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t, @P_num Numero_t, @P_adr adresse_t,
 @P_tel telephone_t, @P_Renouvellement renouvellement_t, @P_anciennete anciennete_t, @P_politique politique_t
 as
@@ -286,7 +317,7 @@ BEGIN
 		END
 END
 
-exec ProcAbonner 'Quentin', 
+exec Abonner 'Quentin', 
 'Joubert',
 '1997-02-04',
 'Asticot', 
@@ -298,9 +329,9 @@ exec ProcAbonner 'Quentin',
 1
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcAbonneAdresse
+drop procedure AbonneAdresse
 
-create procedure ProcAbonneAdresse
+create procedure AbonneAdresse
 @P_numero Numero_t
 as
 declare @v_adresse adresse_t
@@ -313,9 +344,9 @@ begin
 	else
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
 end
-exec ProcAbonneAdresse 069
+exec AbonneAdresse 069
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure PROCModifierAbo
+create or alter procedure ModifierAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
 AS
 BEGIN
@@ -350,12 +381,12 @@ END
 Else
 print 'L''abonnée n''existe pas'
 End
-exec PROCModifierAbo 'Quentin', 'Joubert', '1997-02-04', 'NULL'
-exec PROCModifierAbo 'Camus','Albert','1952-01-01', 'NULL'
+exec ModifierAbo 'Quentin', 'Joubert', '1997-02-04', 'NULL'
+exec ModifierAbo 'Camus','Albert','1952-01-01', 'NULL'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROClitigePhys
+drop procedure LitigePhys
 /*list retard de plus de 7j*/
-create procedure PROClitigePhys
+create procedure LitigePhys
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 Declare @v_TitreVF TitreVF_t
@@ -385,11 +416,11 @@ OPEN C_LitigePhys
 	CLOSE C_LitigePhys
 	DEALLOCATE C_LitigePhys
 end
-exec PROClitigePhys 'Albert','Camus','1952-01-01'
+exec LitigePhys 'Albert','Camus','1952-01-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROClitigeNum
+drop procedure LitigeNum
 /*list retard de plus de 7j*/
-create procedure PROClitigeNum
+create procedure LitigeNum
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 Declare @v_TitreVF TitreVF_t
@@ -419,5 +450,5 @@ OPEN C_LitigeNum
 	CLOSE C_LitigeNum
 	DEALLOCATE C_LitigeNum
 end
-exec PROClitigeNum 'Allo','Mais','1929-21-06'
+exec LitigeNum 'Allo','Mais','1929-21-06'
 //////////////////////////////////////////////////////////////////////////////////////////////////
