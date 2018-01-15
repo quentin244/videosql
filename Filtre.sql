@@ -184,7 +184,7 @@ DECLARE @P_titreVO TitreVO_t
 BEGIN
     SET @P_titreVO=(select titreVO from Film where TitreVF=@P_filmVF);
     print @P_filmVF+' a pour titre en original '+@P_titreVO
-END
+EN
 exec TitreVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Dure2h
@@ -216,7 +216,7 @@ BEGIN
     print 'Liste des films de plus de 2h realises par '+@P_prenomR+' '+@P_nomR
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_film
+   	 print @v_fil
    	 FETCH NEXT FROM C_duree into @v_film
     END
 END
@@ -228,7 +228,7 @@ exec Dure2h 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitreEnVO
 /*redit*/
-create procedure TitreEnVO
+create procedure TitreEnV
 @P_filmVF Film_t
 as
 Declare @v_titreVO Film_t
@@ -304,7 +304,7 @@ deallocate C_langueST
 end
 exec LangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure Site
+drop procedure Sit
 /* site pour le film */
 create procedure Site
 @P_titre TitreVF_t
@@ -324,14 +324,114 @@ drop procedure procFilmPrime
 create procedure procFilmPrime
 @P_DateD Date,@P_TitreVF TitreVF_t,@P_NomDist nomDistinction_t,@P_Categorie varchar(25),@P_Lieu varchar(25)
 as
-begin
+BEGIN
 if (exists(select * from Distinction where Nom = @P_NomDist and Categorie = @P_Categorie and Lieu = @P_Lieu))
-Begin
+	Begin
 	insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
-end
+	End
 else
-Begin
+	Begin
 	insert into Distinction values(@P_NomDist,@P_Categorie,@P_Lieu)
 	insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
-End
-end
+	End
+END
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure IdDeTitre
+/*liste id louable en fonction de Titre*/
+create procedure IdDeTitre
+@P_TitreVF TitreVF_t
+AS
+declare @v_id id_t
+declare C_titre cursor for
+select id
+from Physique P
+where P.TitreVF=@P_TitreVF AND not in ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
+
+BEGIN
+open C_titre
+fetch next from C_titre into @v_id
+
+if @@FETCH_STATUS <> 0
+   print 'Aucune id disponible pour le film '+@P_TitreVF
+else
+	begin
+	print 'Liste des id disponibles pour le film '+@P_TitreVF
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_id
+		fetch next from C_titre into @v_id
+		end	
+	end
+close C_titre
+deallocate C_titre
+
+END
+exec IdDeTitre 'Avatar'
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure IdDeTitreEdition
+/*liste id louable en fonction de Titre Edition*/
+create procedure IdDeTitreEdition
+@P_TitreVF TitreVF_t, @P_Edition Edition_t
+AS
+declare @v_id id_t
+declare C_titreedition cursor for
+select id
+from Physique P
+where P.TitreVF=@P_TitreVF AND P.Edition=@P_Edition AND id NOT IN ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
+
+BEGIN
+open C_titreedition
+fetch next from C_titreedition into @v_id
+
+if @@FETCH_STATUS <> 0
+   print 'Aucune id disponible pour le film '+@P_TitreVF
+else
+	begin
+	print 'Liste des id disponibles pour le film '+@P_TitreVF
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_id
+		fetch next from C_titreedition into @v_id
+		end	
+	end
+close C_titreedition
+deallocate C_titreedition
+
+END
+exec IdDeTitreEdition 'Avatar','Base'
+select * from LouerPhys where TitreVF='Avatar'
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure IdDeTitreSupport
+/*liste id louable en fonction de Titre Support*/
+create procedure IdDeTitreSupport
+@P_TitreVF TitreVF_t, @P_Support Support_t
+AS
+declare @v_id id_t
+declare C_titresupport cursor for
+select id
+from Physique P
+where P.TitreVF=@P_TitreVF AND P.Support=@P_Support AND id NOT IN ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
+
+BEGIN
+open C_titresupport
+fetch next from C_titresupport into @v_id
+
+if @@FETCH_STATUS <> 0
+   print 'Aucune '+@P_Support+' disponible pour le film '+@P_TitreVF
+else
+	begin
+	print 'Liste des '+@P_Support+' disponibles pour le film '+@P_TitreVF
+	while @@FETCH_STATUS = 0
+		begin
+		print @v_id
+		fetch next from C_titresupport into @v_id
+		end	
+	end
+close C_titresupport
+deallocate C_titresupport
+
+END
+exec IdDeTitreSupport 'Avatar','DVD'
+select * from Physique where TitreVF='Avatar'
+select * from LouerPhys where TitreVF='Avatar'
+//////////////////////////////////////////////////////////////////////////////////////////////////////
