@@ -1,3 +1,4 @@
+SET DATEFORMAT ymd;  
 /*Afficher Tous les Abonnement*/
 exec AvantAboTout
 /*S'Abonner*/
@@ -14,6 +15,9 @@ select * from Abonné
 /*Afficher les film en stock et support*/
 exec TitrefilmEnStockPhys
 exec TitrefilmEnStockNum
-
+/*Afficher toute les version disponible d'un film*/
 exec VersionFilmPhys 'Avatar', 'BlueRay'
+/*Louer un film */
 exec LocationPhys 11566, 'Avatar','1928-07-22','Java','Albert','Camus','1952-01-01', 0
+/*Rendre un film*/
+exec RenduLocation 'Albert','Camus','1952-01-01', 'Avatar','2018-01-15'

@@ -1,5 +1,4 @@
 SET DATEFORMAT ymd;  
-Insert into LouerPhys values ('2018-01-01',NULL, 11566, 'Avatar','1928-07-22','Java','Joubert', 'Quentin', '1997-04-02', 0)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
@@ -79,7 +78,7 @@ END
 create or alter Procedure LocationPhys  
 @v_Id id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
-Declare @v_DateDebut DateV_t = (select getdate())
+Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 
 DECLARE @return_status_PEGI int;
@@ -114,10 +113,12 @@ BEGIN
 	END
 END
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 create or alter Procedure LocationNum
 @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
-Declare @v_DateDebut DateV_t = (select getdate())
+Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 
 DECLARE @return_status_PEGI int;
@@ -149,85 +150,6 @@ BEGIN
 			Insert into LouerNum values (@v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
 			Print 'La location a bien été enregistré'
 		END
-	END
-END
-
-drop TRIGGER VerifLocationPhys
-/* trigger les verifs lors d'une insertion dans louer */
-create TRIGGER VerifLocationPhys
-ON LouerPhys
-FOR INSERT   
-AS
-Declare @v_Id id_t = (select id from inserted) 
-Declare @v_TitreVF TitreVF_t = (select TitreVF from inserted)
-Declare @v_Date DateV_t = (select DateV from inserted)
-Declare @v_Edition Edition_t = (select Edition from inserted)
-Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
-Declare @v_Pegi Integer
-Declare @v_Force Integer = (select Force from inserted)
-DECLARE @return_status_PEGI int;
-DECLARE @return_status_Stock int;     
-BEGIN 
-	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Edition
-	if(@return_status_Stock = 0)
-		BEGIN
-			print ('Aucun Film en stock Annulé');
-			ROLLBACK TRANSACTION;
-		END
-	else
-	BEGIN
-   if(@v_Force <> 2)
-	BEGIN
-		exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-		if(@return_status_PEGI = 1)
-		BEGIN
-			print ('Insertion Annulé');
-			ROLLBACK TRANSACTION;
-		END
-	END
-	else
-	BEGIN
-		exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-	END
-	END
-END
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop TRIGGER VerifLocationNum
-/* trigger les verifs lors d'une insertion dans louer */
-create TRIGGER VerifLocationNum
-ON LouerNum
-FOR INSERT   
-AS 
-Declare @v_TitreVF TitreVF_t = (select TitreVF from inserted)
-Declare @v_Date DateV_t = (select DateV from inserted)
-Declare @v_Edition Edition_t = (select Edition from inserted)
-Declare @v_NumAbo Numero_t = (select Numero from inserted, Abonné where inserted.Nom = Abonné.Nom and inserted.Prenom = Abonné.Prenom and inserted.DateNaiss = Abonné.DateNaiss)
-Declare @v_Pegi Integer
-Declare @v_Force Integer = (select Force from inserted)
-DECLARE @return_status_PEGI int;
-DECLARE @return_status_Stock int;     
-BEGIN 
-	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Edition
-	if(@return_status_Stock = 0)
-		BEGIN
-			print ('Aucun Fim en stock Annulé');
-			ROLLBACK TRANSACTION;
-		END
-	else
-	BEGIN
-   if(@v_Force <> 2)
-	BEGIN
-		exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-		if(@return_status_PEGI = 1)
-		BEGIN
-			print ('Insertion Annulé');
-			ROLLBACK TRANSACTION;
-		END
-	END
-	else
-	BEGIN
-		exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-	END
 	END
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +388,7 @@ BEGIN
 	Else
 	BEGIN
 
-		print 'Film en cours de location le ' + convert(varchar, GETDATE()) + ':'
+		print 'Film en cours de location le ' + convert(varchar, CAST(getdate() AS DATE)) + ':'
 		while @@FETCH_STATUS = 0
 		BEGIN
 			print  ' ' + @v_TitreVF 
@@ -486,10 +408,10 @@ create or alter procedure RenduLocation
 AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
-Declare @v_Date DateV_t = (select GETDATE())
+Declare @v_Date DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_DateRendu DateV_t
 BEGIN
-if (exists(select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
+if (exists(select * from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
 Begin
 Set @v_DateRendu = (select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
 if (@v_DateRendu is NULL)
@@ -503,7 +425,7 @@ if (@v_DateRendu is NULL)
 		print  'ERREUR : ce fim a deja une date de rendu'  
 	END
 End
-Else if (exists(select DateFin from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
+Else if (exists(select * from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
 Begin
 Set @v_DateRendu = (select DateFin from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
 if (@v_DateRendu is NULL)
@@ -522,8 +444,7 @@ begin
 print 'La location n''existe pas'
 end
 END
-SET DATEFORMAT ymd;  
-exec RenduLocation 'Joubert','Quentin','1997-04-02', 'Avatar','2018-01-01'
+exec RenduLocation 'Albert','Camus','1952-01-01', 'Avatar','2018-01-15'
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DateFinPrevu
