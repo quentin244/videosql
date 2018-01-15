@@ -8,22 +8,29 @@ create procedure VerifStockPhys
 @P_IdPhys id_t, @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
 declare @v_DateFin date = (select DateFin from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
-declare @v_DateDebut date = (select DateDebut from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
 Declare @v_Etat Etat_t = (select Etat from Physique where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
 	if(@v_Etat<5)
 	BEGIN
 		print 'Ce film est en stock'
-		if((@v_DateDebut < (select getDate())) and ((select getDate()) < @v_DateFin))
-		begin
-			print 'ce film est deja louer'
-			Return 0
-		end
+		if (exists (select * from LouerPhys where id = @P_IdPhys and TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition))
+		Begin
+			if (@v_DateFin is null)
+			begin
+				print 'ce film est deja louer'
+				Return 0
+			end
+			else
+			begin
+				print 'ce film est disponible'
+				Return 1
+			end
+		End
 		else
 		begin
 			print 'ce film est disponible'
 			Return 1
-		end
+		End
 	END
 	else
 	begin
@@ -61,13 +68,90 @@ Declare @v_AgeP int = (Year(getdate())- Year((Select DateNaiss From Abonné Wher
 Declare @v_PegiF int = (Select PEGI FROM Version WHERE TitreVF=@P_TitreVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
 IF (@v_AgeP < @v_PegiF)
-    	BEGIN
-    		Print 'Attention votre age est inferieur a l''age minimal conseillé'
-			Return 1
-    	END
-Return 0
+BEGIN
+	Print 'Attention votre age est inferieur a l''age minimal conseillé'
+	Return 1
+    END
+	Else 
+		Return 0
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
+create or alter Procedure LocationPhys  
+@v_Id id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
+AS
+Declare @v_DateDebut DateV_t = (select getdate())
+Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+
+DECLARE @return_status_PEGI int;
+DECLARE @return_status_Stock int;     
+BEGIN 
+	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Edition
+	if(@return_status_Stock = 0)
+	BEGIN
+		print ('Aucun Film en stock Annulé');
+	END
+	else
+	BEGIN
+		if(@v_Force <> 2)
+		BEGIN
+			exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+			if(@return_status_PEGI = 1)
+			BEGIN
+				print ('Vous n''avez pas l''age requis. Insertion Annulé');
+			END
+			else
+			Begin
+				Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+				Print 'La location a bien été enregistré'
+			End
+		END
+		else
+		BEGIN
+			exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+			Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+			Print 'La location a bien été enregistré'
+		END
+	END
+END
+
+create or alter Procedure LocationNum
+@v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
+AS
+Declare @v_DateDebut DateV_t = (select getdate())
+Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+
+DECLARE @return_status_PEGI int;
+DECLARE @return_status_Stock int;     
+BEGIN 
+	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Edition
+	if(@return_status_Stock = 0)
+	BEGIN
+		print ('Aucun Film en stock Annulé');
+	END
+	else
+	BEGIN
+		if(@v_Force <> 2)
+		BEGIN
+			exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+			if(@return_status_PEGI = 1)
+			BEGIN
+				print ('Vous n''avez pas l''age requis. Insertion Annulé');
+			END
+			else
+			Begin
+				Insert into LouerNum values (@v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+				Print 'La location a bien été enregistré'
+			End
+		END
+		else
+		BEGIN
+			exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+			Insert into LouerNum values (@v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+			Print 'La location a bien été enregistré'
+		END
+	END
+END
+
 drop TRIGGER VerifLocationPhys
 /* trigger les verifs lors d'une insertion dans louer */
 create TRIGGER VerifLocationPhys
@@ -797,3 +881,75 @@ DEALLOCATE C_TitreStockPhys
 
 END
 exec TitrefilmEnStockPhys
+
+drop procedure VersionFilmPhys
+
+create procedure VersionFilmPhys
+@P_film film_t, @P_Support film_t
+AS
+DECLARE @v_id id_t
+DECLARE @v_DateV DateV_t
+DECLARE @v_Edition Edition_t
+
+DECLARE C_TitreStockPhys CURSOR FOR
+select id, DateV, Edition
+from Physique
+where TitreVF = @P_film and Support = @P_Support
+and id not in (select id from LouerPhys where DateFin is Null)
+
+
+BEGIN
+OPEN C_TitreStockPhys
+FETCH NEXT FROM C_TitreStockPhys into @v_id, @v_DateV, @v_Edition
+
+IF @@FETCH_STATUS <> 0
+    print 'Aucun film en stock Physique disponible'
+ELSE
+BEGIN
+    print 'Les version actuelement disponible du film ' + @P_film + ' en '+ @P_Support +' sont  :'
+    While @@FETCH_STATUS = 0
+    BEGIN
+   	 print 'Id :' +str(@v_id) + ' Date : '+convert(varchar, @v_DateV) + ' Edition : '+@v_Edition
+   	 FETCH NEXT FROM C_TitreStockPhys into @v_id, @v_DateV, @v_Edition
+
+    END
+END
+CLOSE C_TitreStockPhys
+DEALLOCATE C_TitreStockPhys
+
+END
+exec VersionFilmPhys 'Avatar', 'DVD'
+
+drop procedure VersionFilmNum
+create procedure VersionFilmNum
+@P_film film_t
+AS
+DECLARE @v_DateV DateV_t
+DECLARE @v_Edition Edition_t
+
+DECLARE C_TitreStockNum CURSOR FOR
+select DateV, Edition
+from Numérique
+where TitreVF = @P_film
+
+BEGIN
+OPEN C_TitreStockNum
+FETCH NEXT FROM C_TitreStockNum into @v_DateV, @v_Edition
+
+IF @@FETCH_STATUS <> 0
+    print 'Aucun film en stock Physique'
+ELSE
+BEGIN
+    print 'Les version actuelement disponible du film ' + @P_film + ' sont  :'
+    While @@FETCH_STATUS = 0
+    BEGIN
+   	 print ' Date : '+convert(varchar, @v_DateV) + ' Edition : '+@v_Edition
+   	 FETCH NEXT FROM C_TitreStockNum into @v_DateV, @v_Edition
+
+    END
+END
+CLOSE C_TitreStockNum
+DEALLOCATE C_TitreStockNum
+END
+
+exec VersionFilmNum 'Avatar'

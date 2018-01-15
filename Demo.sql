@@ -14,3 +14,6 @@ select * from Abonné
 /*Afficher les film en stock et support*/
 exec TitrefilmEnStockPhys
 exec TitrefilmEnStockNum
+
+exec VersionFilmPhys 'Avatar', 'BlueRay'
+exec LocationPhys 11566, 'Avatar','1928-07-22','Java','Albert','Camus','1952-01-01', 0
