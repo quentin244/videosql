@@ -1,8 +1,8 @@
 SET DATEFORMAT ymd;  
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCrealisateur
+drop procedure RealisateurDeFilm
 /* prend un real et liste ses films en stock*/ 
-create procedure PROCrealisateur
+create procedure RealisateurDeFilm
 @P_film film_t
 AS
 DECLARE @v_nomR nom_t
@@ -10,11 +10,11 @@ BEGIN
     Set @v_nomR = (select nom from participer where @P_film=titreVF And Role = 'Realisateur');
     print @P_film +' est realise par '+@v_nomR
 END
-exec PROCrealisateur 'Titanic'
+exec RealisateurDeFilm 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCfilmAct
+drop procedure FilmDeActeur
 /* prend un act et liste ses films en stock*/ 
-create procedure PROCfilmAct
+create procedure FilmDeActeur
 @P_nomA nom_t, @P_prenomA prenom_t
 AS
 DECLARE @v_film Film_t
@@ -43,11 +43,11 @@ END
 CLOSE C_filmAct
 DEALLOCATE C_filmAct
 END
-exec PROCfilmAct 'DiCaprio', 'Leonardo'
+exec FilmDeActeur 'DiCaprio', 'Leonardo'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCdistinctionFilm
+drop procedure DistinctionDeFilm
 /* Prend un film est liste ses distinctions*/
-create procedure PROCdistinctionFilm
+create procedure DistinctionDeFilm
 @P_film film_t
 AS
 DECLARE @v_nomDist nomDistinction_t 
@@ -76,11 +76,11 @@ END
 CLOSE C_filmDist
 DEALLOCATE C_filmDist
 END
-exec PROCdistinctionFilm 'Titanic'
+exec DistinctionDeFilm 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure AfficheEdition
+drop procedure VersionDeFilm
 /*Prend un film et print les editions en stock*/
-create procedure AfficheEdition
+create procedure VersionDeFilm
 @P_TitreVF TitreVF_t
 AS
 Declare @v_Edition Edition_t
@@ -107,12 +107,12 @@ BEGIN
 	CLOSE ListEdition
 	DEALLOCATE ListEdition
 END
-exec AfficheEdition 'Avatar'
+exec VersionDeFilm 'Avatar'
 exec VerifStockPhys 11566,'Avatar','BlueRay','1928-07-22','Java'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCfilmreal
+drop procedure FilmDeReal
 /*prend prenom,nom d'un real et print ses films*/
-create procedure PROCfilmreal
+create procedure FilmDeReal
 @P_nomReal Nom_t, @P_prenomReal Prenom_t
 AS
 Declare @v_film TitreVF_t
@@ -142,11 +142,11 @@ BEGIN
 	CLOSE C_filmDeReal
 	DEALLOCATE C_filmDeReal
 END
-exec PROCfilmreal 'Cameron', 'James'
+exec FilmDeReal 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure trending
+drop procedure Trending
 /*print trending*/
-create procedure trending
+create procedure Trending
 AS
 Declare @v_TitreVF TitreVF_t
 Declare @v_count int
@@ -173,11 +173,11 @@ BEGIN
 	CLOSE C_Film_trend
 	DEALLOCATE C_Film_trend
 END
-exec trending
+exec Trending
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCfilmVo
+drop procedure TitreVO
 /*print titre VO*/
-create procedure PROCfilmVo
+create procedure TitreVO
 @P_filmVF Film_t
 AS
 DECLARE @P_titreVO TitreVO_t
@@ -185,11 +185,11 @@ BEGIN
     SET @P_titreVO=(select titreVO from Film where TitreVF=@P_filmVF);
     print @P_filmVF+' a pour titre en original '+@P_titreVO
 END
-exec PROCfilmVo 'Titanic'
+exec TitreVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure PROCduree
+drop procedure Dure2h
 /*liste les films d'un real de plus de 2h*/
-create procedure PROCduree
+create procedure Dure2h
 @P_nomR nom_t,@P_prenomR prenom_t
 as
 DECLARE @v_film Film_t
@@ -224,11 +224,11 @@ CLOSE C_duree
 DEALLOCATE C_duree
 
 END
-exec PROCduree 'Cameron', 'James'
+exec Dure2h 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcVraiNom
+drop procedure TitreEnVO
 /*redit*/
-create procedure ProcVraiNom
+create procedure TitreEnVO
 @P_filmVF Film_t
 as
 Declare @v_titreVO Film_t
@@ -236,11 +236,11 @@ BEGIN
     set @v_titreVO=(select titreVO from Film where @P_filmVF=titreVF)
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
-ProcVraiNom 'Titanic'
+TitreEnVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcLangueBandeSon
+drop procedure LangueBandeSon
 
-create procedure ProcLangueBandeSon
+create procedure LangueBandeSon
 @P_titre TitreVF_t
 as
 declare @v_langue Langue_t
@@ -268,11 +268,11 @@ close C_langueBS
 deallocate C_langueBS
 
 end
-exec ProcLangueBandeSon 'Titanic'
+exec LangueBandeSon 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure ProcLangueSousTitre
+drop procedure LangueSousTitre
 
-create procedure ProcLangueSousTitre
+create procedure LangueSousTitre
 @P_titre TitreVF_t
 as
 declare @v_langue Langue_t
@@ -302,11 +302,11 @@ close C_langueST
 deallocate C_langueST
 
 end
-exec ProcLangueSousTitre 'Titanic'
+exec LangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure Site
 /* site pour le film */
-
-create Procedure procSiteFilm
+create procedure Site
 @P_titre TitreVF_t
 as
 declare @v_site Site_t
@@ -317,11 +317,10 @@ begin
     else
        print 'Le site du film '+@P_titre+' est : ' +@v_site
 end
-exec procSiteFilm 'Brice de Nice'
+exec Site 'Brice de Nice'
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-/* insertion d'un film primé */
 drop procedure procFilmPrime 
-
+/* insertion d'un film primé */
 create procedure procFilmPrime
 @P_DateD Date,@P_TitreVF TitreVF_t,@P_NomDist nomDistinction_t,@P_Categorie varchar(25),@P_Lieu varchar(25)
 as
