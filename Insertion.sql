@@ -605,6 +605,8 @@ insert into Numérique(TitreVF,Prix,DateV,Edition,DateInsert)
 values ('Titanic',25,'2016-01-06','Idée','2016-12-13');
 
 insert into LouerPhys
+values('2017-01-01','2017-07-07',846,'Avatar','1996-11-30','Base','Allo','Mais','1929-06-21', 0);
+insert into LouerPhys
 values('2017-01-01',NULL,9870,'Titanic','2014-08-29','Java','Wowday','Henrie','1968-11-20', 0);
 insert into LouerPhys
 values('2017-05-22',NULL,11,'Intouchables','1928-11-30','Base','Wowday','Henry','1968-10-17', 0);
