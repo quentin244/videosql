@@ -43,9 +43,8 @@ drop procedure VerifStockNum
 create procedure VerifStockNum
 @P_filmVF TitreVF_t, @P_Date DateV_t, @P_Edition Edition_t
 as
-Declare @v_Film TitreVF_t = (select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition)
 BEGIN
-	IF (not exists(select titreVF from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition))
+	IF (not exists(select * from Numérique where TitreVF = @P_filmVF and DateV = @P_Date and Edition = @P_Edition))
 	BEGIN
 		print 'ce film n''est pas en stock'
 		Return 0
@@ -116,7 +115,7 @@ END
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 create or alter Procedure LocationNum
-@v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
+@v_IdLocation id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
 Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
@@ -140,7 +139,7 @@ BEGIN
 			END
 			else
 			Begin
-				Insert into LouerNum values (@v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+				Insert into LouerNum values (@v_IdLocation, @v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
 				Print 'La location a bien été enregistré'
 			End
 		END
@@ -247,9 +246,9 @@ DEALLOCATE C_prixNum
 
 END
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure rachat
+drop procedure Achat
 /*prend l'id d'un film est le suppr*/
-create procedure rachat
+create procedure Achat
 @P_Id id_t
 AS
 Declare @v_Edition Edition_t
@@ -259,18 +258,21 @@ set @v_Edition = (Select Edition From Physique Where id = @P_Id);
 set @v_TitreVF = (Select TitreVF From Physique where id = @P_Id);
 set @v_DateV = (Select DateV From Physique Where id = @P_Id);
 BEGIN
-delete From Physique Where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV;
-print'id suppr'
-IF ((select COUNT(*) From Physique Where Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV)=0)
-    Delete From Version Where Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV
-    print'version suppr'
-    BEGIN
-    IF ((select COUNT(*) From Version Where @v_TitreVF = TitreVF)=0)
-   	 print'film suppr'
-   	 delete from Film Where  TitreVF =@v_TitreVF
-    END
-END
-exec rachat 444
+	if (Exists(select * From Physique where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV))
+	Begin
+		if (Exists(select * From LouerPhys where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV and DateFin is null))
+			Print 'Le Film '+ str(@P_Id) + ' Est en cours de location'
+		else
+		Begin
+			delete From Physique Where id = @P_Id and Edition = @v_Edition and TitreVF = @v_TitreVF and DateV = @v_DateV;
+			print'Le film a bien ete supprimé'
+		End
+	End
+	ELSE
+	Print 'Le Film '+ str(@P_Id) + ' n''existe pas'
+End
+exec Achat 11
+select * from Physique
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure durable
 /*avg durable par film*/
@@ -401,38 +403,24 @@ END
 exec FilmLouer
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure RenduLocation
+drop procedure RenduLocationPhys
 
-create or alter procedure RenduLocation
-@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
+create or alter procedure RenduLocationPhys
+@P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_Id id_t, @P_DateDebut DateV_t
 AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
 Declare @v_DateFinPrevu DateV_t = @P_DateDebut + @v_DureeLocAutor
 Declare @v_Date DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_DateRendu DateV_t
 BEGIN
-if (exists(select * from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
+if (exists(select * from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and id = @P_Id and DateDebut =@P_DateDebut ))
 Begin
-Set @v_DateRendu = (select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
+Set @v_DateRendu = (select DateFin from LouerPhys where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and id = @P_Id and DateDebut =@P_DateDebut )
 if (@v_DateRendu is NULL)
 	BEGIN
 		update LouerPhys set DateFin = @v_Date 
 		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
-		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
-	END
-	ELSE
-	BEGIN
-		print  'ERREUR : ce fim a deja une date de rendu'  
-	END
-End
-Else if (exists(select * from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut ))
-Begin
-Set @v_DateRendu = (select DateFin from LouerNum where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut )
-if (@v_DateRendu is NULL)
-	BEGIN
-		update LouerNum set DateFin = @v_Date 
-		where Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss 
-		and TitreVF = @P_TitreVF and DateDebut =@P_DateDebut 
+		and id = @P_Id and DateDebut =@P_DateDebut 
 	END
 	ELSE
 	BEGIN
@@ -444,8 +432,37 @@ begin
 print 'La location n''existe pas'
 end
 END
-exec RenduLocation 'Albert','Camus','1952-01-01', 'Avatar','2018-01-15'
+exec RenduLocationPhys 'Albert','Camus','1952-01-01', '21','2017-06-30'
 select * from LouerPhys
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure RenduLocationNum
+
+create or alter procedure RenduLocationNum
+@P_IdLocation id_t
+AS
+Declare @v_Date DateV_t = (select CAST(getdate() AS DATE))
+Declare @v_DateRendu DateV_t
+BEGIN
+if (exists(select * from LouerNum where IdLocation =@P_IdLocation ))
+Begin
+Set @v_DateRendu = (select DateFin from LouerNum where IdLocation =@P_IdLocation)
+if (@v_DateRendu is NULL)
+	BEGIN
+		update LouerNum set DateFin = @v_Date 
+		where IdLocation =@P_IdLocation
+	END
+	ELSE
+	BEGIN
+		print  'ERREUR : ce fim a deja une date de rendu'  
+	END
+End
+Else
+begin 
+print 'La location n''existe pas'
+end
+END
+exec RenduLocationNum 111
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DateFinPrevu
 
@@ -780,7 +797,8 @@ DECLARE @v_Support film_t
 DECLARE C_TitreStockPhys CURSOR FOR
 select distinct (titreVF), Support
 from Physique
-where Physique.id not in (select id from LouerPhys where DateFin is Null)
+where id not in (select id from LouerPhys where DateFin is Null)
+and id not in (select  id from Physique where Etat = 5)
 
 BEGIN
 OPEN C_TitreStockPhys
@@ -817,6 +835,7 @@ select id, DateV, Edition
 from Physique
 where TitreVF = @P_film and Support = @P_Support
 and id not in (select id from LouerPhys where DateFin is Null)
+and id not in (select  id from Physique where Etat = 5)
 
 
 BEGIN
