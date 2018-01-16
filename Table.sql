@@ -63,6 +63,7 @@ primary key (TitreVF,DateV,Edition),
 constraint fk1_Numérique foreign key (TitreVF,DateV,Edition) references Version(TitreVF,DateV,Edition) on update cascade on delete cascade 
 );
 Create table LouerNum(
+IdLocation smallint,
 DateDebut datetime check(DateDebut <= getdate()),
 DateFin datetime,
 TitreVF	varchar(52),
@@ -72,7 +73,7 @@ Nom	varchar(25),
 Prenom varchar(25),
 DateNaiss datetime,
 Force Integer Default(0),
-Primary Key(Nom, Prenom, DateNaiss, TitreVF, DateDebut),
+Primary Key(IdLocation),
 constraint checkNum check(DateFin > DateDebut),
 constraint fk1_LouerNum foreign key (Nom,Prenom,DateNaiss) references Abonné(Nom,Prenom,DateNaiss) on update cascade on delete NO Action,
 constraint fk2_LouerNum foreign key (TitreVF,DateV,Edition) references Numérique(TitreVF,DateV,Edition) on update no action on delete cascade
@@ -88,7 +89,7 @@ Edition varchar(25),
 DateInsert datetime	default getdate(),
 primary key(id,DateV,Edition,TitreVF),
 constraint fk1_Physique foreign key (TitreVF,DateV,Edition) references Version(TitreVF,DateV,Edition) on update cascade on delete no action
-);         
+);
 Create table LouerPhys(
 DateDebut datetime check(DateDebut <= getdate()),
 DateFin datetime ,
@@ -100,7 +101,7 @@ Nom varchar(25),
 Prenom varchar(25),
 DateNaiss datetime,
 Force Integer Default(0),
-Primary Key(Nom, Prenom, DateNaiss, TitreVF, DateDebut),
+Primary Key(Nom, Prenom, DateNaiss, id, DateDebut),
 constraint checkPhy check(DateFin > DateDebut),
 constraint fk1_LouerPhys foreign key (id,DateV,Edition,TitreVF) references Physique(id,DateV,Edition,TitreVF) on update no action on delete cascade,
 constraint fk2_LouerPhys foreign key (Nom,Prenom,DateNaiss) references Abonné(Nom,Prenom,DateNaiss) on update no action on delete No action
