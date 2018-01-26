@@ -79,35 +79,44 @@ create or alter Procedure LocationPhys
 AS
 Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_NbLocAutor int= (select LocationMax from Abonnement, Abonné where Abonné.Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = Abonnement.Nom)
+Declare @v_NbLocReel int = (select count(*)From LouerPhys where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and DateDebut is null)
 
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
-	exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Edition
-	if(@return_status_Stock = 0)
-	BEGIN
-		print ('Aucun Film en stock Annulé');
-	END
+	if(@v_NbLocAutor <= @v_NbLocReel)
+	Begin
+		print ('Vous utilise tout vos emprunt autorisé. pour emprunter plus upgrader votre abonement');
+	End
 	else
-	BEGIN
-		if(@v_Force <> 2)
+	begin
+		exec @return_status_Stock = VerifStockPhys @v_Id, @v_TitreVF, @v_Date, @v_Edition
+		if(@return_status_Stock = 0)
 		BEGIN
-			exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-			if(@return_status_PEGI = 1)
-			BEGIN
-				print ('Vous n''avez pas l''age requis. Insertion Annulé');
-			END
-			else
-			Begin
-				Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
-				Print 'La location a bien été enregistré'
-			End
+			print ('Aucun Film en stock Annulé');
 		END
 		else
 		BEGIN
-			exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-			Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
-			Print 'La location a bien été enregistré'
+			if(@v_Force <> 2)
+			BEGIN
+				exec @return_status_PEGI = PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+				if(@return_status_PEGI = 1)
+				BEGIN
+					print ('Vous n''avez pas l''age requis. Insertion Annulé');
+				END
+				else
+				Begin
+					Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+					Print 'La location a bien été enregistré'
+				End
+			END
+			else
+			BEGIN
+				exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
+				Insert into LouerPhys values (@v_DateDebut,NULL, @v_Id, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+				Print 'La location a bien été enregistré'
+			END
 		END
 	END
 END
@@ -119,10 +128,18 @@ create or alter Procedure LocationNum
 AS
 Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
 Declare @v_NumAbo Numero_t = (select Numero from Abonné where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
+Declare @v_NbLocAutor int= (select LocationMax from Abonnement, Abonné where Abonné.Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and Nom_Abonnement = Abonnement.Nom)
+Declare @v_NbLocReel int = (select count(*)From LouerNum where Nom = @P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss and DateDebut is null)
 
 DECLARE @return_status_PEGI int;
 DECLARE @return_status_Stock int;     
 BEGIN 
+if(@v_NbLocAutor <= @v_NbLocReel)
+	Begin
+		print ('Vous utilise tout vos emprunt autorisé. pour emprunter plus upgrader votre abonement');
+	End
+	else
+	begin
 	exec @return_status_Stock = VerifStockNum @v_TitreVF, @v_Date, @v_Edition
 	if(@return_status_Stock = 0)
 	BEGIN
@@ -146,11 +163,12 @@ BEGIN
 		else
 		BEGIN
 			exec PEGIreminder @v_TitreVF, @v_Date, @v_Edition, @v_NumAbo
-			Insert into LouerNum values (@v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
+			Insert into LouerNum values (@v_IdLocation, @v_DateDebut,NULL, @v_TitreVF,@v_Date, @v_Edition,@P_Nom, @P_Prenom, @P_DateNaiss, @v_Force)
 			Print 'La location a bien été enregistré'
 		END
 	END
 END
+end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmNonLouable
 /* liste les films trop use pour etre loue */
