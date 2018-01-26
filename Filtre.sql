@@ -228,7 +228,7 @@ exec Dure2h 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitreEnVO
 /*redit*/
-create procedure TitreEnV
+create procedure TitreEnVO
 @P_filmVF Film_t
 as
 Declare @v_titreVO Film_t
@@ -304,7 +304,7 @@ deallocate C_langueST
 end
 exec LangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure Sit
+drop procedure Site
 /* site pour le film */
 create procedure Site
 @P_titre TitreVF_t

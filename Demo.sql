@@ -14,9 +14,13 @@ exec TitrefilmEnStockPhys
 exec TitrefilmEnStockNum
 /*Afficher toute les version disponible d'un film*/
 exec VersionFilmPhys 'Avatar', 'BlueRay'
+exec NbFilmLoue
 /*Louer un film */
 exec LocationPhys 11566, 'Avatar','1928-07-22','Java','Albert','Camus','1952-01-01', 0
+exec LocPhys '2018-01-26'
+exec NbFilmLoue
+exec FilmLouer
 /*Rendre un film*/
-exec RenduLocationPhys 'Albert','Camus','1952-01-01', 11566,'2018-01-16'
-
+exec RenduLocationPhys 'Albert','Camus','1952-01-01', 11566,'2018-01-26'
+exec NbFilmLoue
 exec Achat 11566
