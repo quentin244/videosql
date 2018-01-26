@@ -18,6 +18,7 @@ exec NbFilmLoue
 /*Louer un film */
 exec LocationPhys 11566, 'Avatar','1928-07-22','Java','Albert','Camus','1952-01-01', 0
 exec LocationNum 123, 'Avatar','1928-07-22','Java','Albert','Camus','1952-01-01', 0
+exec FilmLouerClient 'Albert','Camus','1952-01-01'
 exec LocPhys '2018-01-26'
 exec NbFilmLoue
 exec FilmLouer

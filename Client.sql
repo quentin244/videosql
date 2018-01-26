@@ -452,3 +452,36 @@ OPEN C_LitigeNum
 end
 exec LitigeNum 'Allo','Mais','1929-21-06'
 //////////////////////////////////////////////////////////////////////////////////////////////////
+create or alter procedure FilmLouerClient
+@P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
+AS
+Declare @v_TitreVF TitreVF_t
+Declare @v_DateDebut date
+
+DECLARE C_Locphys CURSOR FOR 
+Select TitreVF, DateDebut
+From LouerPhys
+where Nom = @P_Prenom
+And Prenom = @P_Nom
+And DateNaiss = @P_DateNaiss
+And DateFin is null
+begin 
+OPEN C_Locphys
+	FETCH NEXT FROM C_Locphys into @v_TitreVF, @v_DateDebut
+	IF @@FETCH_STATUS <> 0
+	Begin
+		print 'Aucune location en cours'
+	End
+	ELSE
+	BEGIN
+	print 'L abonne numero '+@P_Prenom + @P_Nom+' a en cours de location :'
+		While @@FETCH_STATUS = 0
+		BEGIN
+		print @v_TitreVF + ' ' + convert(Varchar, @v_DateDebut) 
+		FETCH NEXT FROM C_Locphys into @v_TitreVF, @v_DateDebut
+		End
+	END
+	CLOSE C_Locphys
+	DEALLOCATE C_Locphys
+end
+exec FilmLouerClient 'Albert','Camus','1952-01-01'
