@@ -10,6 +10,7 @@ BEGIN
     Set @v_nomR = (select nom from participer where @P_film=titreVF And Role = 'Realisateur');
     print @P_film +' est realise par '+@v_nomR
 END
+
 exec RealisateurDeFilm 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmDeActeur
@@ -43,6 +44,7 @@ END
 CLOSE C_filmAct
 DEALLOCATE C_filmAct
 END
+
 exec FilmDeActeur 'DiCaprio', 'Leonardo'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DistinctionDeFilm
@@ -76,6 +78,7 @@ END
 CLOSE C_filmDist
 DEALLOCATE C_filmDist
 END
+
 exec DistinctionDeFilm 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VersionDeFilm
@@ -107,6 +110,7 @@ BEGIN
 	CLOSE ListEdition
 	DEALLOCATE ListEdition
 END
+
 exec VersionDeFilm 'Avatar'
 exec VerifStockPhys 11566,'Avatar','BlueRay','1928-07-22','Java'
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -142,6 +146,7 @@ BEGIN
 	CLOSE C_filmDeReal
 	DEALLOCATE C_filmDeReal
 END
+
 exec FilmDeReal 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Trending
@@ -173,6 +178,7 @@ BEGIN
 	CLOSE C_Film_trend
 	DEALLOCATE C_Film_trend
 END
+
 exec Trending
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitreVO
@@ -184,7 +190,8 @@ DECLARE @P_titreVO TitreVO_t
 BEGIN
     SET @P_titreVO=(select titreVO from Film where TitreVF=@P_filmVF);
     print @P_filmVF+' a pour titre en original '+@P_titreVO
-EN
+END
+
 exec TitreVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Dure2h
@@ -216,7 +223,7 @@ BEGIN
     print 'Liste des films de plus de 2h realises par '+@P_prenomR+' '+@P_nomR
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_fil
+   	 print @v_film
    	 FETCH NEXT FROM C_duree into @v_film
     END
 END
@@ -224,6 +231,7 @@ CLOSE C_duree
 DEALLOCATE C_duree
 
 END
+
 exec Dure2h 'Cameron', 'James'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitreEnVO
@@ -236,7 +244,8 @@ BEGIN
     set @v_titreVO=(select titreVO from Film where @P_filmVF=titreVF)
     print 'le titre original du film '+@P_filmVF+' est '+@v_titreVO
 END
-TitreEnVO 'Titanic'
+
+exec TitreEnVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LangueBandeSon
 
@@ -268,6 +277,7 @@ close C_langueBS
 deallocate C_langueBS
 
 end
+
 exec LangueBandeSon 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LangueSousTitre
@@ -302,6 +312,7 @@ close C_langueST
 deallocate C_langueST
 
 end
+
 exec LangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Site
@@ -317,6 +328,7 @@ begin
     else
        print 'Le site du film '+@P_titre+' est : ' +@v_site
 end
+
 exec Site 'Brice de Nice'
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure procFilmPrime 
@@ -335,6 +347,8 @@ else
 	insert into DistinguerFilm values(@P_DateD,@P_TitreVF,@P_NomDist,@P_Categorie,@P_Lieu)
 	End
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure IdDeTitre
 /*liste id louable en fonction de Titre*/
@@ -366,6 +380,7 @@ close C_titre
 deallocate C_titre
 
 END
+
 exec IdDeTitre 'Avatar'
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure IdDeTitreEdition
@@ -398,6 +413,7 @@ close C_titreedition
 deallocate C_titreedition
 
 END
+
 exec IdDeTitreEdition 'Avatar','Base'
 select * from LouerPhys where TitreVF='Avatar'
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -431,6 +447,7 @@ close C_titresupport
 deallocate C_titresupport
 
 END
+
 exec IdDeTitreSupport 'Avatar','DVD'
 select * from Physique where TitreVF='Avatar'
 select * from LouerPhys where TitreVF='Avatar'

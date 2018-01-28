@@ -1,5 +1,4 @@
 SET DATEFORMAT ymd;  
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockPhys
 /* Prend la clef primaire d'un film et print si il louable/deja/pas */
@@ -37,6 +36,8 @@ BEGIN
 		Return 0
 	end
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VerifStockNum
 /* Prend la clef primaire d'un film et print si il louable/pas */
@@ -56,6 +57,8 @@ BEGIN
 			Return 1
 	END
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PEGIreminder
 /* lie au trigger PEGI  */
@@ -73,8 +76,12 @@ BEGIN
 	Else 
 		Return 0
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter Procedure LocationPhys  
+drop procedure LocationPhys
+
+create procedure LocationPhys
 @v_Id id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
 Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
@@ -121,9 +128,11 @@ BEGIN
 	END
 END
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
 
-create or alter Procedure LocationNum
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure LocationNum
+
+create procedure LocationNum
 @v_IdLocation id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
 Declare @v_DateDebut DateV_t = (select CAST(getdate() AS DATE))
@@ -169,6 +178,8 @@ if(@v_NbLocAutor <= @v_NbLocReel)
 	END
 END
 end
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmNonLouable
 /* liste les films trop use pour etre loue */
@@ -199,6 +210,8 @@ BEGIN
 	CLOSE C_Film
 	DEALLOCATE C_Film
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PrixPhys
 /*prend deux annees et liste les films dedans avec leurs prix correspondant*/
@@ -229,6 +242,8 @@ END
 CLOSE C_prixPhys
 DEALLOCATE C_prixPhys
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure PrixNum
 /*prend deux annees et liste les films dedans avec leurs prix correspondant*/
@@ -263,6 +278,8 @@ CLOSE C_prixNum
 DEALLOCATE C_prixNum
 
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Achat
 /*prend l'id d'un film est le suppr*/
@@ -289,6 +306,7 @@ BEGIN
 	ELSE
 	Print 'Le Film '+ str(@P_Id) + ' n''existe pas'
 End
+
 exec Achat 11
 select * from Physique
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -321,6 +339,7 @@ BEGIN
 	CLOSE C_durable
 	DEALLOCATE C_durable
 END
+
 exec durable
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DRMreminder
@@ -333,9 +352,9 @@ BEGIN
 	Print 'DRM : ' + @v_DRM
 	Return 1
 END
+
 exec ProcDRMreminder 'Protéger et Servir', '1974-05-12', 'Bonus'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
 drop procedure DureeMaxLoc
 
 create procedure DureeMaxLoc
@@ -351,6 +370,7 @@ begin
 	else
 	   print 'La duree maximale de l abonnement '+@P_nomAbo+' est de '+str(@v_dureeMax)+' jours'
 end
+
 exec ProcDureeMaxLoc 'Asticot'
 ///////////////////////////////////////////////
 drop procedure NbFilmEnStock
@@ -363,10 +383,11 @@ BEGIN
 	Print 'il y a '+str(@v_nbFilmStock)+' films en stock'
 	Return @v_nbFilmStock
 END
+
 exec procNbFilmEnStock
 //////////////////////////////////////////////////
-/* nombre de films loues */
 drop procedure NbFilmLoue
+/* nombre de films loues */
 create procedure NbFilmLoue
 as
 declare @v_nbFilmLoue smallint
@@ -376,6 +397,7 @@ begin
 	print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
 	return @v_nbFilmLoue
 end
+
 exec NbFilmLoue
 //////////////////////////////////////////////
 drop procedure NbFilmLouable
@@ -388,11 +410,12 @@ begin
 	set @v_nbFilmLouable=(select distinct(count(*)) from physique where etat <= 5)+(select count(*) from Numérique)+(select count(*) from louerPhys where datefin is not null)+(select distinct(count(*)) from louerNum where datefin is not null)
 	print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
 end
+
 exec NbFilmLouable
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmLouer
 
-create or alter procedure FilmLouer
+create procedure FilmLouer
 AS 
 Declare @v_TitreVF TitreVF_t
 DECLARE C_Film CURSOR FOR
@@ -418,12 +441,13 @@ BEGIN
 	CLOSE C_Film
 	DEALLOCATE C_Film
 END
+
 exec FilmLouer
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenduLocationPhys
 
-create or alter procedure RenduLocationPhys
+create procedure RenduLocationPhys
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_Id id_t, @P_DateDebut DateV_t
 AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
@@ -450,13 +474,13 @@ begin
 print 'La location n''existe pas'
 end
 END
+
 exec RenduLocationPhys 'Albert','Camus','1952-01-01', '21','2017-06-30'
 select * from LouerPhys
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenduLocationNum
 
-create or alter procedure RenduLocationNum
+create procedure RenduLocationNum
 @P_IdLocation id_t
 AS
 Declare @v_Date DateV_t = (select CAST(getdate() AS DATE))
@@ -480,11 +504,12 @@ begin
 print 'La location n''existe pas'
 end
 END
+
 exec RenduLocationNum 111
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DateFinPrevu
 
-create or alter procedure DateFinPrevu
+create procedure DateFinPrevu
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
 Declare @v_DureeLocAutor DateV_t = (select DureeLoc From Abonné, Abonnement where Abonné.Nom_Abonnement = Abonnement.Nom and Abonné.Nom =@P_Nom and Prenom = @P_Prenom and DateNaiss = @P_DateNaiss)
@@ -505,31 +530,8 @@ begin
     print 'il y a '+str(@v_nbFilmStock)+' film(s) en stock'
     return @v_nbFilmStock
 end
+
 exec NbFilmStock
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure NbFilmLoue
-/* nombre de films loues */
-create procedure NbFilmLoue
-as 
-declare @v_nbFilmLoue integer 
-begin 
-    set @v_nbFilmLoue=(select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum) 
-    print 'il y a '+str(@v_nbFilmLoue)+' film(s) loue(s)'
-    return @v_nbFilmLoue
-end
-exec NbFilmLoue
-//////////////////////////////////////////////////////////////////////////////////////////////////
-drop procedure NbFilmLouable
-/* nombre de films louables */
-create procedure NbFilmLouable
-as
-declare @v_nbFilmLouable integer
-begin
-    set @v_nbFilmLouable=((select distinct(count(*)) from numérique )+(select distinct(count(*)) from physique where etat <= 5))-((select distinct(count(*)) from louerPhys where dateFin is null)+(select distinct(count(*)) from louerNum where dateFin is null))
-    print 'il y a '+str(@v_nbFilmLouable)+' film(s) louables(s)'
-    return @v_nbFilmLouable
-end
-exec NbFilmLouable
 ////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure trendingDRM
 /*trending drm */
@@ -559,6 +561,7 @@ BEGIN
         CLOSE C_DRM_trend
         DEALLOCATE C_DRM_trend
 END
+
 exec trendingDRM
 /////////////////////////////////////////////////////////////////////////////
 drop procedure etatDRM
@@ -590,6 +593,7 @@ BEGIN
         CLOSE C_etatDRM
         DEALLOCATE C_etatDRM
 END
+
 exec etatDRM
 /////////////////////////////////////////////////////////////////////////////
 drop procedure trendingGestionnaire
@@ -629,6 +633,7 @@ BEGIN
 	CLOSE C_Film_trendStock
 	DEALLOCATE C_Film_trendStock	
 END
+
 exec trendingGestionnaire
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocPhys
@@ -665,6 +670,7 @@ else
 close C_locPhys
 deallocate C_locPhys
 end
+
 exec LocPhys '2017-08-12'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocNum
@@ -702,6 +708,7 @@ else
 close C_locNum
 deallocate C_locNum
 end
+
 exec LocNum '2017-01-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetourLocPhys
@@ -738,6 +745,8 @@ else
 close C_retourLocPhys
 deallocate C_retourLocPhys
 end
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetourLocNum
 
@@ -773,7 +782,7 @@ deallocate C_retourLocNum
 end
 
 exec VerifStockPhys ''
-
+//////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitrefilmEnStockNum
 
 create procedure TitrefilmEnStockNum
@@ -803,8 +812,9 @@ CLOSE C_TitreStockNum
 DEALLOCATE C_TitreStockNum
 
 END
-exec TitrefilmEnStockNum
 
+exec TitrefilmEnStockNum
+//////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitrefilmEnStockPhys
 
 create procedure TitrefilmEnStockPhys
@@ -837,8 +847,9 @@ CLOSE C_TitreStockPhys
 DEALLOCATE C_TitreStockPhys
 
 END
-exec TitrefilmEnStockPhys
 
+exec TitrefilmEnStockPhys
+//////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VersionFilmPhys
 
 create procedure VersionFilmPhys
@@ -876,9 +887,11 @@ CLOSE C_TitreStockPhys
 DEALLOCATE C_TitreStockPhys
 
 END
-exec VersionFilmPhys 'Avatar', 'DVD'
 
+exec VersionFilmPhys 'Avatar', 'DVD'
+//////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VersionFilmNum
+
 create procedure VersionFilmNum
 @P_film film_t
 AS
@@ -911,3 +924,4 @@ DEALLOCATE C_TitreStockNum
 END
 
 exec VersionFilmNum 'Avatar'
+//////////////////////////////////////////////////////////////////////////////////////////////////

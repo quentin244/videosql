@@ -49,6 +49,7 @@ BEGIN
 		return 0;
 	end
 End
+
 exec EstAbo 'Thebase','Whenday','1984-11-08'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AvantAbo
@@ -63,8 +64,11 @@ DECLARE @v_dureeLoc Duree_t = (select DureeLoc from Abonnement where nom=@P_abo)
 BEGIN
     print 'Avec l abonnement '+@P_abo+' pour' + str(@v_prix)+' euros on peut louer '+ str(@v_nb)+' films pendant une duree de '+str(@v_dureeLoc)+' jours'
 END
-exec AvantAbo 'Asticot'
 
+exec AvantAbo 'Asticot'
+//////////////////////////////////////////////////////////////////////////////////////////////////
+drop procedure AvantAboTout
+/*Liste des abonnes avec un retard en cours*/
 create procedure AvantAboTout
 AS
 Declare @v_nom Abonnement_t
@@ -131,6 +135,7 @@ CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
+
 exec RetardNum
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetardPhys
@@ -167,9 +172,11 @@ END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
+
 exec RetardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetardNumPers
+
 create procedure RetardNumPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
@@ -204,8 +211,11 @@ CLOSE C_retardNum
 DEALLOCATE C_retardNum
 
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetardPhysPers
+
 create procedure RetardPhysPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
@@ -217,8 +227,8 @@ From LouerPhys
 where Nom = @P_Prenom
 And Prenom = @P_Nom
 And DateNaiss = @P_DateNaiss
-And (DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
-OR (getdate() >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)))))
+And ((DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)))
+OR (getdate() >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))))
 
 BEGIN
 
@@ -239,10 +249,12 @@ END
 CLOSE C_retardPhys
 DEALLOCATE C_retardPhys
 END
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenouvellementAbo
 /*list doit payer*/
-create or alter procedure RenouvellementAbo
+create procedure RenouvellementAbo
 AS
 DECLARE @v_nom Nom_t
 DECLARE @v_prenom prenom_t
@@ -291,6 +303,7 @@ BEGIN
 	CLOSE C_renouvellement
 	DEALLOCATE C_renouvellement
 END
+
 exec RenouvellementAbo
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Abonner
@@ -317,17 +330,7 @@ BEGIN
 		END
 END
 
-exec Abonner 'Quentin', 
-'Joubert',
-'1997-02-04',
-'Asticot', 
-069, 
-'37 rue louis Morard 75014 Paris', 
-069, 
-'2019-08-01', 
-1,
-1
-
+exec Abonner 'Quentin','Joubert','1997-02-04','Asticot',069, '37 rue louis Morard 75014 Paris',069,'2019-08-01',1,1
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AbonneAdresse
 
@@ -344,9 +347,12 @@ begin
 	else
 	   print 'L adresse de l abonne numero '+str(@P_numero)+' est '+@v_adresse
 end
+
 exec AbonneAdresse 069
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure ModifierAbo
+drop procedure ModifierAbo
+
+create procedure ModifierAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
 AS
 BEGIN
@@ -381,6 +387,7 @@ END
 Else
 print 'L''abonnée n''existe pas'
 End
+
 exec ModifierAbo 'Quentin', 'Joubert', '1997-02-04', 'NULL'
 exec ModifierAbo 'Camus','Albert','1952-01-01', 'NULL'
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,6 +423,7 @@ OPEN C_LitigePhys
 	CLOSE C_LitigePhys
 	DEALLOCATE C_LitigePhys
 end
+
 exec LitigePhys 'Albert','Camus','1952-01-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LitigeNum
@@ -450,9 +458,12 @@ OPEN C_LitigeNum
 	CLOSE C_LitigeNum
 	DEALLOCATE C_LitigeNum
 end
+
 exec LitigeNum 'Allo','Mais','1929-21-06'
 //////////////////////////////////////////////////////////////////////////////////////////////////
-create or alter procedure FilmLouerClient
+drop procedure FilmLouerClient
+
+create procedure FilmLouerClient
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
 Declare @v_TitreVF TitreVF_t
@@ -484,4 +495,5 @@ OPEN C_Locphys
 	CLOSE C_Locphys
 	DEALLOCATE C_Locphys
 end
+
 exec FilmLouerClient 'Albert','Camus','1952-01-01'
