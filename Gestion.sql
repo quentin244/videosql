@@ -80,7 +80,7 @@ END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocationPhys
-
+/* Loue un Phys*/
 create procedure LocationPhys
 @v_Id id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
@@ -94,7 +94,7 @@ DECLARE @return_status_Stock int;
 BEGIN 
 	if(@v_NbLocAutor <= @v_NbLocReel)
 	Begin
-		print ('Vous utilise tout vos emprunt autorisé. pour emprunter plus upgrader votre abonement');
+		print ('Vous utilisez tous vos emprunts autorisés. pour emprunter plus, upgradez votre abonement');
 	End
 	else
 	begin
@@ -131,7 +131,7 @@ END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocationNum
-
+/* Loue un Num */
 create procedure LocationNum
 @v_IdLocation id_t, @v_TitreVF TitreVF_t, @v_Date DateV_t, @v_Edition Edition_t, @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @v_Force int
 AS
@@ -356,7 +356,7 @@ END
 exec ProcDRMreminder 'Protéger et Servir', '1974-05-12', 'Bonus'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DureeMaxLoc
-
+/*renseigne sur la duree max d'un abonnement donne*/
 create procedure DureeMaxLoc
 @P_nomAbo Abonnement_t
 as
@@ -401,7 +401,7 @@ end
 exec NbFilmLoue
 //////////////////////////////////////////////
 drop procedure NbFilmLouable
-
+/*renseigne sur le nombre de film louable en stock*/
 create procedure NbFilmLouable
 as
 declare @v_nbFilmLouable smallint
@@ -446,7 +446,7 @@ exec FilmLouer
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenduLocationPhys
-
+/* */
 create procedure RenduLocationPhys
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_Id id_t, @P_DateDebut DateV_t
 AS

@@ -248,7 +248,7 @@ END
 exec TitreEnVO 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LangueBandeSon
-
+/*Liste les langue disponible pour la bande son du film*/
 create procedure LangueBandeSon
 @P_titre TitreVF_t
 as
@@ -281,7 +281,7 @@ end
 exec LangueBandeSon 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LangueSousTitre
-
+/*Liste les langue disponible pour les sous-titres du film*/
 create procedure LangueSousTitre
 @P_titre TitreVF_t
 as
@@ -298,10 +298,10 @@ open C_langueST
 fetch next from C_langueST into @v_langue
 
 if @@FETCH_STATUS <> 0
-   print 'Aucune langue disponible pour la bande son du film '+@P_titre
+   print 'Aucune langue disponible pour les sous-titres du film '+@P_titre
 else
 	begin
-	print 'Liste des langues disponibles pour le film '+@P_titre
+	print 'Liste des langues disponibles pour les sous-titres film '+@P_titre
 	while @@FETCH_STATUS = 0
 		begin
 		print @v_langue
@@ -316,7 +316,7 @@ end
 exec LangueSousTitre 'Titanic'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure Site
-/* site pour le film */
+/* Affiche le site pour le film */
 create procedure Site
 @P_titre TitreVF_t
 as
@@ -359,7 +359,7 @@ declare @v_id id_t
 declare C_titre cursor for
 select id
 from Physique P
-where P.TitreVF=@P_TitreVF AND not in ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
+where P.TitreVF=@P_TitreVF AND P.id not in ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
 
 BEGIN
 open C_titre
