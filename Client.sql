@@ -175,7 +175,7 @@ END
 exec RetardPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetardNumPers
-
+/*affiche retard Num d'un abonne*/
 create procedure RetardNumPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
@@ -199,7 +199,7 @@ IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
 ELSE
 BEGIN
-    print 'Les retard de ''abonne' + @P_Prenom + ' '+ @P_Nom
+    print 'Les retard de l''abonne' + @P_Prenom + ' '+ @P_Nom +' sont :'
     While @@FETCH_STATUS = 0
     BEGIN
    	 print @v_TitreVf
@@ -214,7 +214,7 @@ END
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetardPhysPers
-
+/*affiche retard Num d'un abonne*/
 create procedure RetardPhysPers
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
@@ -332,7 +332,7 @@ END
 exec Abonner 'Quentin','Joubert','1997-02-04','Asticot',069, '37 rue louis Morard 75014 Paris',069,'2019-08-01',1,1
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure AbonneAdresse
-
+/*affiche l'adresse d'un abonne*/
 create procedure AbonneAdresse
 @P_numero Numero_t
 as
@@ -350,7 +350,7 @@ end
 exec AbonneAdresse 069
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure ModifierAbo
-
+/*modofie l'abonnement d'un abonne*/
 create procedure ModifierAbo
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t, @P_Abonnement Abonnement_t
 AS
@@ -461,7 +461,7 @@ end
 exec LitigeNum 'Allo','Mais','1929-21-06'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmLouerClient
-
+/*affiche les locations en cours d'un abonne*/
 create procedure FilmLouerClient
 @P_Prenom prenom_t, @P_Nom nom_t, @P_DateNaiss dateNaiss_t
 AS
