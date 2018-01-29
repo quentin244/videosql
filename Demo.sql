@@ -26,3 +26,7 @@ exec FilmLouer
 exec RenduLocationPhys 'Albert','Camus','1952-01-01', 11566,'2018-01-29'
 exec NbFilmLoue
 exec Achat 11566
+exec RetardPhys
+exec RetardNum
+exec RetardPhysPers 'Albert','Camus','1952-01-01'
+exec RetardNumPers 'Allo','Mais','1929-06-21'

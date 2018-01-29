@@ -109,7 +109,7 @@ DECLARE @v_prenom prenom_t
 DECLARE @v_dateNaiss dateNaiss_t
 
 DECLARE C_retardNum CURSOR FOR
-Select Nom, Prenom, DateNaiss
+Select distinct(Nom), Prenom, DateNaiss
 From LouerNum
 where(DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
 OR (getdate() >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerNum.prenom and Abonné.nom = LouerNum.nom and Abonné.DateNaiss = LouerNum.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))))
@@ -126,7 +126,7 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_nom + ' '+ @v_prenom
+   	 print @v_nom + ' '+ @v_prenom + ' '+ convert(varchar,@v_dateNaiss)
    	 FETCH NEXT FROM C_retardNum into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
@@ -147,7 +147,7 @@ DECLARE @v_prenom prenom_t
 DECLARE @v_dateNaiss dateNaiss_t
 
 DECLARE C_retardPhys CURSOR FOR
-Select Nom, Prenom, DateNaiss
+Select distinct (Nom), Prenom, DateNaiss
 From LouerPhys
 where (DateFin >=(DateDebut + (Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom))
 OR (getdate() >=(Select DureeLoc From Abonnement, Abonné where Abonné.prenom = LouerPhys.prenom and Abonné.nom = LouerPhys.nom and Abonné.DateNaiss = LouerPhys.DateNaiss And Abonné.Nom_Abonnement = Abonnement.Nom)))
@@ -164,7 +164,7 @@ BEGIN
     print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
-   	 print @v_nom + ' '+ @v_prenom
+   	 print @v_nom + ' '+ @v_prenom  + ' '+ convert(varchar,@v_dateNaiss)
    	 FETCH NEXT FROM C_retardPhys into @v_nom, @v_prenom, @v_dateNaiss
     END
 END
@@ -238,7 +238,7 @@ IF @@FETCH_STATUS <> 0
     print 'Aucun abonne n a de retard'
 ELSE
 BEGIN
-    print 'Les retard de ''abonne' + @P_Prenom + ' '+ @P_Nom
+    print 'Les retard de l''abonne' + @P_Prenom + ' '+ @P_Nom
     While @@FETCH_STATUS = 0
     BEGIN
    	 print @v_TitreVf
