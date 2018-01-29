@@ -84,10 +84,9 @@ BEGIN
 OPEN C_Abo
 FETCH NEXT FROM C_Abo into @v_nom, @v_prix, @v_nb, @v_dureeLoc
 IF @@FETCH_STATUS <> 0
-    print 'Aucun abonne n a de retard'
+    print 'Aucun abonnement repertorié'
 ELSE
 BEGIN
-    print 'Liste des abonnes avec un retard en cours'
     While @@FETCH_STATUS = 0
     BEGIN
    	 print 'Avec l abonnement '+@v_nom+' pour' + str(@v_prix)+' euros on peut louer '+ str(@v_nb)+' films pendant une duree de '+str(@v_dureeLoc)+' jours'

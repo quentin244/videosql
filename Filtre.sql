@@ -359,7 +359,7 @@ declare @v_id id_t
 declare C_titre cursor for
 select id
 from Physique P
-where P.TitreVF=@P_TitreVF AND not in ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
+where P.TitreVF=@P_TitreVF AND P.id not in ( select id from LouerPhys where DateFin = NULL ) AND Etat < 5
 
 BEGIN
 open C_titre
