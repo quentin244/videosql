@@ -414,7 +414,7 @@ end
 exec NbFilmLouable
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure FilmLouer
-
+/*Liste les films en cours de location*/
 create procedure FilmLouer
 AS 
 Declare @v_TitreVF TitreVF_t
@@ -446,7 +446,7 @@ exec FilmLouer
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenduLocationPhys
-/* */
+/*fonction rendre une location*/
 create procedure RenduLocationPhys
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_Id id_t, @P_DateDebut DateV_t
 AS
@@ -479,7 +479,7 @@ exec RenduLocationPhys 'Albert','Camus','1952-01-01', '21','2017-06-30'
 select * from LouerPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RenduLocationNum
-
+/*fonction rendre une location*/
 create procedure RenduLocationNum
 @P_IdLocation id_t
 AS
@@ -508,7 +508,7 @@ END
 exec RenduLocationNum 111
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure DateFinPrevu
-
+/*calcul date fin d'une location*/
 create procedure DateFinPrevu
 @P_Nom Nom_t, @P_Prenom Prenom_t, @P_DateNaiss dateNaiss_t, @P_TitreVF TitreVF_t, @P_DateDebut DateV_t
 AS
@@ -637,7 +637,7 @@ END
 exec trendingGestionnaire
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocPhys
-
+/*Liste des abonnes qui ont effectue au moins une location physique un jour donne*/
 create procedure LocPhys
 @P_dateDebut Dateloc_t
 as
@@ -674,7 +674,7 @@ end
 exec LocPhys '2017-08-12'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure LocNum
-
+/*Liste des abonnes qui ont effectue au moins une location num un jour donne*/
 create procedure LocNum
 @P_dateDebut Dateloc_t
 as
@@ -712,7 +712,7 @@ end
 exec LocNum '2017-01-01'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetourLocPhys
-
+/* retour location phys*/
 create procedure RetourLocPhys
 @P_dateFin DateV_t
 as
@@ -749,7 +749,7 @@ end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure RetourLocNum
-
+/* retour location Num*/
 create procedure RetourLocNum
 @P_dateFin DateV_t
 as
@@ -784,7 +784,7 @@ end
 exec VerifStockPhys ''
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitrefilmEnStockNum
-
+/*Liste des films en stock Numerique*/
 create procedure TitrefilmEnStockNum
 AS
 DECLARE @v_film film_t
@@ -816,7 +816,7 @@ END
 exec TitrefilmEnStockNum
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure TitrefilmEnStockPhys
-
+/*Liste des films en stock physique*/
 create procedure TitrefilmEnStockPhys
 AS
 DECLARE @v_film film_t
@@ -851,7 +851,7 @@ END
 exec TitrefilmEnStockPhys
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VersionFilmPhys
-
+/*liste Les version actuelement disponible du film*/
 create procedure VersionFilmPhys
 @P_film film_t, @P_Support film_t
 AS
@@ -891,7 +891,7 @@ END
 exec VersionFilmPhys 'Avatar', 'DVD'
 //////////////////////////////////////////////////////////////////////////////////////////////////
 drop procedure VersionFilmNum
-
+/*liste Les version actuelement disponible du film*/
 create procedure VersionFilmNum
 @P_film film_t
 AS
