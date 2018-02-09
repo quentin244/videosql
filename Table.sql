@@ -104,8 +104,9 @@ Force Integer Default(0),
 Primary Key(Nom, Prenom, DateNaiss, id, DateDebut),
 constraint checkPhy check(DateFin >= DateDebut),
 constraint fk1_LouerPhys foreign key (id,DateV,Edition,TitreVF) references Physique(id,DateV,Edition,TitreVF) on update no action on delete cascade,
-constraint fk2_LouerPhys foreign key (Nom,Prenom,DateNaiss) references Abonné(Nom,Prenom,DateNaiss) on update no action on delete No action
+constraint fk2_LouerPhys foreign key (Nom,Prenom,DateNaiss) references Abonné(Nom,Prenom,DateNaiss) on update no action on delete cascade
 );
+
 Create table Langue(
 Langue			varchar(25) primary key
 );

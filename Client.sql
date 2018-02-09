@@ -359,13 +359,13 @@ IF(Exists(select * from Abonné where Nom=@P_Nom and Prenom=@P_Prenom and DateNa
 Begin
 	IF(@P_Abonnement = 'NULL')
 	BEGIN
-		IF(Exists(select * from LouerNum where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null or DateFin > GETDATE()))
+		IF(Exists(select * from LouerNum where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null))
 		Begin
    			print 'attention : l''abonne a des location en cours '
 		End
 		ELSE
 		Begin
-			IF(Exists(select * from LouerPhys where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null or DateFin > GETDATE()))
+			IF(Exists(select * from LouerPhys where Nom=@P_Nom and Prenom=@P_Prenom and DateNaiss= @P_DateNaiss and DateFin is null))
 			Begin
    				print 'attention : l''abonne a des location en cours' 
 			End

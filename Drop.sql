@@ -16,6 +16,7 @@ drop table Professionnel;
 drop table Abonné;
 drop table Abonnement;
 drop table Personne;
+
 /////////////
 drop type Abonnement_t ;
 drop type PrixAbonnement_t;
